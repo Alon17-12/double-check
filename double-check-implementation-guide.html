@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Double Check — מדריך יישום מלא</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1e3a8a;
+  --navy-dark: #172554;
+  --navy-light: #3b5cb8;
+  --cyan: #38C4F2;
+  --pink: #F05680;
+  --green: #22c55e;
+  --yellow: #fbbf24;
+  --bg: #f7f8fc;
+  --surface: #ffffff;
+  --border: rgba(30,58,138,0.1);
+  --text-main: #1e293b;
+  --text-sub: #64748b;
+  --code-bg: #1a2740;
+  --font-he: 'Heebo', sans-serif;
+  --font-en: 'Fredoka', sans-serif;
+  --font-code: 'Menlo', 'Consolas', 'Monaco', monospace;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-he); color: var(--text-main); background: var(--bg); line-height: 1.7; }
+
+/* ── SIDEBAR NAV ── */
+.sidebar {
+  position: fixed;
+  top: 0; right: 0;
+  width: 280px; height: 100vh;
+  background: var(--navy);
+  padding: 32px 24px;
+  overflow-y: auto;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-logo {
+  font-family: var(--font-en);
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+  letter-spacing: -0.5px;
+}
+.sidebar-logo span { color: var(--cyan); }
+.sidebar-subtitle {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 32px;
+  line-height: 1.4;
+}
+.sidebar-nav { list-style: none; flex: 1; }
+.sidebar-nav li { margin-bottom: 4px; }
+.sidebar-nav a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+.sidebar-nav a:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.sidebar-nav a.active { background: rgba(56,196,242,0.15); color: var(--cyan); font-weight: 600; }
+.sidebar-nav .nav-num {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-en);
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.sidebar-nav a.active .nav-num {
+  background: linear-gradient(135deg, var(--cyan), #2da8d4);
+  color: #fff;
+}
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  text-align: center;
+}
+
+/* ── MAIN CONTENT ── */
+.main {
+  margin-right: 280px;
+  max-width: 960px;
+  padding: 48px 48px 120px;
+}
+
+/* ── HEADER ── */
+.doc-header {
+  margin-bottom: 48px;
+  padding-bottom: 32px;
+  border-bottom: 2px solid var(--border);
+}
+.doc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, var(--cyan), #2da8d4);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+  letter-spacing: 0.5px;
+}
+.doc-title {
+  font-family: var(--font-en);
+  font-size: 38px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 8px;
+  letter-spacing: -1px;
+}
+.doc-title span { color: var(--cyan); }
+.doc-subtitle {
+  font-size: 15px;
+  color: var(--text-sub);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+.doc-meta {
+  display: flex;
+  gap: 24px;
+  font-size: 12px;
+  color: var(--text-sub);
+  flex-wrap: wrap;
+}
+.doc-meta span { display: flex; align-items: center; gap: 6px; }
+
+/* ── SECTIONS ── */
+section {
+  margin-bottom: 56px;
+  scroll-margin-top: 32px;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.section-num {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cyan), #2da8d4);
+  color: #fff;
+  font-family: var(--font-en);
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.section-title {
+  font-family: var(--font-en);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--navy);
+}
+h3 {
+  font-family: var(--font-en);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 32px 0 12px;
+}
+h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 20px 0 8px;
+}
+p, li { font-size: 14px; line-height: 1.8; }
+p { margin-bottom: 14px; }
+ul, ol { padding-right: 24px; margin-bottom: 16px; }
+li { margin-bottom: 6px; }
+
+/* ── CTO RULES BOX ── */
+.cto-rules {
+  background: linear-gradient(135deg, rgba(56,196,242,0.06), rgba(56,196,242,0.02));
+  border: 1.5px solid rgba(56,196,242,0.2);
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-bottom: 40px;
+}
+.cto-rules-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-en);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+}
+.cto-rules ol { counter-reset: rule; list-style: none; padding: 0; margin: 0; }
+.cto-rules li {
+  counter-increment: rule;
+  padding: 10px 0;
+  padding-right: 32px;
+  position: relative;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+}
+.cto-rules li:last-child { border-bottom: none; }
+.cto-rules li::before {
+  content: counter(rule);
+  position: absolute;
+  right: 0; top: 12px;
+  width: 22px; height: 22px;
+  background: var(--cyan);
+  color: #fff;
+  border-radius: 50%;
+  font-family: var(--font-en);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── INFO BOXES ── */
+.info-box {
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin: 20px 0;
+  font-size: 13px;
+  line-height: 1.6;
+  display: flex;
+  gap: 12px;
+}
+.info-box.tip {
+  background: rgba(56,196,242,0.06);
+  border-right: 3px solid var(--cyan);
+}
+.info-box.warning {
+  background: rgba(240,86,128,0.06);
+  border-right: 3px solid var(--pink);
+}
+.info-box.success {
+  background: rgba(34,197,94,0.06);
+  border-right: 3px solid var(--green);
+}
+.info-box-label {
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.info-box.tip .info-box-label { color: var(--cyan); }
+.info-box.warning .info-box-label { color: var(--pink); }
+.info-box.success .info-box-label { color: var(--green); }
+
+/* ── CODE BLOCKS ── */
+pre {
+  background: var(--code-bg);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 16px 0;
+  overflow-x: auto;
+  direction: ltr;
+  text-align: left;
+}
+code {
+  font-family: var(--font-code);
+  font-size: 13px;
+  line-height: 1.7;
+  color: #e2e8f0;
+}
+.cm { color: #64748b; }
+.kw { color: #c084fc; }
+.str { color: #34d399; }
+.fn { color: #38C4F2; }
+.type { color: #fbbf24; }
+.num { color: #f97316; }
+.op { color: #94a3b8; }
+.attr { color: #f472b6; }
+
+p code, li code, td code {
+  background: rgba(30,58,138,0.06);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--navy);
+  direction: ltr;
+  display: inline-block;
+}
+
+/* ── TABLES ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 13px;
+}
+thead th {
+  background: var(--navy);
+  color: #fff;
+  padding: 12px 16px;
+  text-align: right;
+  font-weight: 600;
+  font-size: 12px;
+}
+thead th:first-child { border-radius: 0 10px 0 0; }
+thead th:last-child { border-radius: 10px 0 0 0; }
+tbody td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+tbody tr:nth-child(even) { background: rgba(30,58,138,0.02); }
+tbody tr:hover { background: rgba(56,196,242,0.04); }
+
+/* ── ARCHITECTURE DIAGRAM ── */
+.arch-diagram {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin: 24px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+  align-items: center;
+}
+.arch-box {
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 130px;
+  background: var(--surface);
+  line-height: 1.4;
+}
+.arch-box small { display: block; color: var(--text-sub); font-weight: 400; font-size: 10px; margin-top: 4px; }
+.arch-box.primary { border-color: var(--cyan); color: var(--cyan); }
+.arch-box.secondary { border-color: var(--navy); color: var(--navy); }
+.arch-box.accent { border-color: var(--pink); color: var(--pink); }
+.arch-box.green { border-color: var(--green); color: var(--green); }
+.arch-arrow {
+  font-size: 18px;
+  color: var(--text-sub);
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+}
+
+/* ── FLOW STEPS ── */
+.flow-steps {
+  counter-reset: step;
+  list-style: none;
+  padding: 0;
+}
+.flow-steps li {
+  counter-increment: step;
+  position: relative;
+  padding: 16px 0 16px 0;
+  padding-right: 56px;
+  border-bottom: 1px solid var(--border);
+}
+.flow-steps li:last-child { border-bottom: none; }
+.flow-steps li::before {
+  content: counter(step);
+  position: absolute;
+  right: 0; top: 16px;
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--navy), var(--navy-light));
+  color: #fff;
+  border-radius: 50%;
+  font-family: var(--font-en);
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.flow-steps strong { color: var(--navy); display: block; margin-bottom: 4px; font-size: 14px; }
+.flow-steps small { color: var(--text-sub); font-size: 12px; }
+
+/* ── ROADMAP PHASES ── */
+.phase {
+  border-right: 3px solid var(--cyan);
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  background: rgba(56,196,242,0.03);
+  border-radius: 0 12px 12px 0;
+}
+.phase-title {
+  font-family: var(--font-en);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.phase-duration {
+  font-size: 11px;
+  color: var(--cyan);
+  font-weight: 600;
+  background: rgba(56,196,242,0.1);
+  padding: 3px 10px;
+  border-radius: 10px;
+}
+.phase ul { margin-bottom: 0; }
+.phase li { font-size: 13px; }
+
+/* ── SCREEN CARDS ── */
+.screen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+.screen-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  transition: all 0.2s;
+}
+.screen-card:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 8px 24px rgba(56,196,242,0.08);
+  transform: translateY(-2px);
+}
+.screen-num {
+  font-family: var(--font-en);
+  font-size: 11px;
+  color: var(--cyan);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.screen-name {
+  font-family: var(--font-en);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+.screen-desc {
+  font-size: 12px;
+  color: var(--text-sub);
+  line-height: 1.6;
+}
+
+/* ── EMAIL PREVIEW ── */
+.email-preview {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px 26px;
+  margin: 16px 0;
+  font-family: var(--font-he);
+  font-size: 13px;
+  line-height: 1.8;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+.email-preview .email-subject {
+  font-weight: 700;
+  color: var(--navy);
+  font-size: 14px;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+  border-bottom: 1px dashed var(--border);
+}
+.email-preview ul { padding-right: 18px; }
+.email-preview .gap-item {
+  padding: 4px 0;
+  font-size: 13px;
+}
+.email-preview .gap-missing { color: var(--pink); }
+.email-preview .gap-partial { color: var(--yellow); }
+.email-preview .gap-damaged { color: var(--navy-light); }
+
+/* ── BADGES ── */
+.tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.tag.free { background: rgba(34,197,94,0.1); color: var(--green); }
+.tag.required { background: rgba(240,86,128,0.1); color: var(--pink); }
+.tag.optional { background: rgba(100,116,139,0.1); color: var(--text-sub); }
+.tag.new { background: rgba(56,196,242,0.1); color: var(--cyan); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-right: 0; padding: 24px 16px 80px; }
+  .doc-title { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">Double<span>Check</span></div>
+  <div class="sidebar-subtitle">מדריך יישום מלא — גרסה 1.0<br>מאי 2026</div>
+  <ul class="sidebar-nav">
+    <li><a href="#overview"><span class="nav-num">1</span> סקירה כללית</a></li>
+    <li><a href="#architecture"><span class="nav-num">2</span> ארכיטקטורה</a></li>
+    <li><a href="#flow"><span class="nav-num">3</span> תהליך עבודה</a></li>
+    <li><a href="#screens"><span class="nav-num">4</span> מסכי המערכת</a></li>
+    <li><a href="#data-model"><span class="nav-num">5</span> מודל נתונים</a></li>
+    <li><a href="#api"><span class="nav-num">6</span> API Endpoints</a></li>
+    <li><a href="#ocr"><span class="nav-num">7</span> חילוץ פריטים (OCR)</a></li>
+    <li><a href="#inbox-magic"><span class="nav-num">8</span> Inbox Magic 📨</a></li>
+    <li><a href="#email"><span class="nav-num">9</span> דוח פערים</a></li>
+    <li><a href="#integrations"><span class="nav-num">10</span> אינטגרציות</a></li>
+    <li><a href="#roadmap"><span class="nav-num">11</span> מפת דרכים</a></li>
+    <li><a href="#components"><span class="nav-num">12</span> רכיבי ממשק</a></li>
+    <li><a href="#tech-summary"><span class="nav-num">13</span> סיכום טכנולוגיות</a></li>
+  </ul>
+  <div class="sidebar-footer">
+    Double Check &copy; 2026 — מסמך פנימי
+  </div>
+</nav>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<div class="main">
+
+  <!-- Document Header -->
+  <div class="doc-header">
+    <div class="doc-badge">IMPLEMENTATION GUIDE</div>
+    <h1 class="doc-title">Double<span>Check</span></h1>
+    <p class="doc-subtitle">אפליקציית וידוא משלוחים — מצלמים קבלה, מסמנים מה הגיע, שולחים דוח פערים בלחיצת כפתור.</p>
+    <div class="doc-meta">
+      <span>📄 גרסה 1.0</span>
+      <span>📅 מאי 2026</span>
+      <span>👤 Alon Gabay</span>
+      <span>🔒 מסמך פנימי</span>
+    </div>
+  </div>
+
+  <!-- CTO Technology Rules -->
+  <div class="cto-rules">
+    <div class="cto-rules-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      CTO TECHNOLOGY RULES
+    </div>
+    <ol>
+      <li><strong>PWA-first</strong> — האפליקציה חייבת לעבוד כ-Installable PWA עם Service Worker, מצב Offline בסיסי, ו-Add to Home Screen בכל פלטפורמה.</li>
+      <li><strong>Hebrew RTL by default</strong> — כל ממשק המשתמש בעברית עם <code>dir="rtl"</code>. אסור placeholder באנגלית. תאריכים ומחירים בפורמט ישראלי (₪, DD/MM/YYYY).</li>
+      <li><strong>OCR via Vision API → JSON only</strong> — הקריאה למודל מחזירה JSON מובנה (לא טקסט חופשי) עם schema קשיח של פריטים. אסור parsing של רגקסים על טקסט גולמי.</li>
+      <li><strong>Excel via SheetJS in-browser</strong> — יצירת ה-Excel קורית בצד הלקוח (xlsx.js), לא ב-server. ככה אין עומס שרת ואפשר לעבוד גם offline.</li>
+      <li><strong>Privacy by default</strong> — תמונות קבלות ומיילים נכנסים נמחקים אוטומטית מ-Storage אחרי 30 יום. למשתמשים אנונימיים — שמירה רק ב-IndexedDB מקומית.</li>
+      <li><strong>📨 Email security mandatory</strong> — כל webhook נכנס מ-Cloudflare → Vercel חייב לעבור אימות HMAC. SPF/DKIM verification אוטומטי. Rate limit של 50 מיילים/יום למשתמש. כתובות לא מוכרות עוברות סיווג Gemini לפני עיבוד.</li>
+    </ol>
+  </div>
+
+  <!-- 1. Overview -->
+  <section id="overview">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <h2 class="section-title">סקירה כללית</h2>
+    </div>
+
+    <p><strong>Double Check</strong> פותרת בעיה כואבת אחת: כשמזמינים סופר/דברים אונליין, חצי מהפעמים יש פערים בין מה ששילמת למה שהגיע. פריטים חסרים, כמויות שגויות, מוצרים מוחלפים, פגי תוקף. רוב האנשים מוותרים על הפיצוי כי זה מסובך מדי לעקוב.</p>
+
+    <p>האפליקציה מקצרת את התהליך לדקה: <strong>מצלמים את הקבלה (או מעבירים מייל אישור הזמנה) → המערכת מחלצת אוטומטית את הפריטים → במהלך הפריקה מסמנים בצ׳קליסט מה הגיע → מקבלים מייל מוכן לשליחה לשירות הלקוחות עם רשימת הפערים.</strong></p>
+
+    <div class="info-box success">
+      <span class="info-box-label">✨ KILLER FEATURE</span>
+      <span><strong>Inbox Magic</strong> — לכל משתמש יש כתובת מייל ייחודית (כמו <code>swift-eagle-42@inbox.doublecheck.app</code>). מעבירים אליה אישור הזמנה מאמזון / AliExpress / SHEIN / רמי לוי / שופרסל — וההזמנה נכנסת אוטומטית. בלי צילום, בלי OCR, בלי הקלדה. זה פותח את כל ההזמנות מחו״ל בלי עבודה נוספת ובונה moat דאטה (אנחנו רואים את כל ההזמנות, יודעים מי ספק בעייתי).</span>
+    </div>
+
+    <h3>Value Proposition</h3>
+    <ul>
+      <li><strong>מהיר</strong> — צילום אחד מחליף הקלדה ידנית של 30+ פריטים.</li>
+      <li><strong>מדויק</strong> — צ׳קליסט מובנה מונע "לשכוח לבדוק" פריט.</li>
+      <li><strong>מוכן לשליחה</strong> — דוח הפערים מנוסח בעברית מקצועית, מוכן להעתקה למייל.</li>
+      <li><strong>היסטורי</strong> — שומר את כל ההזמנות, רואים תבניות של ספקים בעייתיים.</li>
+      <li><strong>גלובלי</strong> — באמצעות Inbox Magic, האפליקציה תומכת באמזון, AliExpress, SHEIN, Temu, iHerb ועוד.</li>
+      <li><strong>Multi-currency</strong> — המרה אוטומטית בין מטבעות (USD/EUR/GBP/ILS) לפי תאריך החיוב.</li>
+    </ul>
+
+    <h3>Target Users</h3>
+    <ul>
+      <li><strong>צרכנים פרטיים</strong> — מזמינים סופר אונליין (רמי לוי, שופרסל, וולט מרקט וכו׳)</li>
+      <li><strong>קונים בחו״ל</strong> — Amazon, AliExpress, SHEIN — דרך Inbox Magic, ללא צילומי קבלה.</li>
+      <li><strong>בעלי עסקים קטנים</strong> — בתי קפה, מסעדות, חנויות שמקבלים משלוחים מספקים.</li>
+      <li><strong>מנהלי משק בית</strong> — אחראים על הזמנות חודשיות עבור משפחה/דירת שותפים.</li>
+    </ul>
+
+    <h3>Success Metrics</h3>
+    <table>
+      <thead><tr><th>מדד</th><th>יעד MVP</th><th>יעד 6 חודשים</th></tr></thead>
+      <tbody>
+        <tr><td>זמן ממוצע מצילום עד דוח פערים</td><td>&lt; 90 שניות</td><td>&lt; 60 שניות</td></tr>
+        <tr><td>דיוק חילוץ פריטים (OCR)</td><td>&gt; 90%</td><td>&gt; 95%</td></tr>
+        <tr><td>אחוז משלוחים שמסתיימים בדוח (Engagement)</td><td>40%</td><td>65%</td></tr>
+        <tr><td>משתמשים פעילים חודשיים (MAU)</td><td>200</td><td>3,000</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 2. Architecture -->
+  <section id="architecture">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <h2 class="section-title">ארכיטקטורה</h2>
+    </div>
+
+    <p>ארכיטקטורת ה-MVP בנויה על <strong>שני input pipelines</strong> (Photo Upload + Inbox Magic) שמתנקזים לאותו core processing layer. PWA בצד הלקוח, Next.js API Routes ב-Vercel, Supabase כ-backend מנוהל, ו-Cloudflare Email Routing לקליטת מיילים.</p>
+
+    <h3>Pipeline A: Photo Upload (קבלה צילום)</h3>
+    <div class="arch-diagram">
+      <div class="arch-box primary">PWA Client<br><small>Next.js 15 + React 19</small></div>
+      <div class="arch-arrow">←</div>
+      <div class="arch-box secondary">API Routes<br><small>/api/ocr</small></div>
+      <div class="arch-arrow">←</div>
+      <div class="arch-box accent">Gemini Vision<br><small>Image → JSON</small></div>
+    </div>
+
+    <h3>Pipeline B: Inbox Magic 📨 (אישור הזמנה במייל)</h3>
+    <div class="arch-diagram">
+      <div class="arch-box accent">Amazon / AliExpress / רמי לוי<br><small>(any retailer)</small></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box primary">Cloudflare Email Worker<br><small>user@inbox.doublecheck.app</small></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box secondary">Vercel Webhook<br><small>/api/inbox/webhook</small></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box accent">Gemini Pro<br><small>HTML → JSON</small></div>
+    </div>
+
+    <h3>Core Storage Layer (משותף לשני ה-pipelines)</h3>
+    <div class="arch-diagram">
+      <div class="arch-box primary">PWA Client</div>
+      <div class="arch-arrow">↔</div>
+      <div class="arch-box green">Supabase<br><small>Postgres + Storage + Auth</small></div>
+      <div class="arch-arrow">↔</div>
+      <div class="arch-box secondary">IndexedDB<br><small>Anonymous mode cache</small></div>
+    </div>
+
+    <h3>למה הבחירות האלה</h3>
+    <table>
+      <thead><tr><th>שכבה</th><th>בחירה</th><th>נימוק</th></tr></thead>
+      <tbody>
+        <tr><td>Frontend</td><td>Next.js 15 App Router</td><td>SSR + Server Components + API Routes באותו פרויקט. Vercel deploy בלחיצה.</td></tr>
+        <tr><td>PWA</td><td>next-pwa + Workbox</td><td>Service Worker אוטומטי, manifest, התקנה למסך הבית, offline-first.</td></tr>
+        <tr><td>Backend</td><td>Supabase</td><td>Postgres + Storage + Auth + RLS — הכל ב-tier חינמי, MCP integration קיים.</td></tr>
+        <tr><td>OCR</td><td>Google Gemini 2.5 Flash</td><td>Free tier של 1500 קריאות/יום, vision מובנה, JSON mode native, עברית מצוינת.</td></tr>
+        <tr><td>UI</td><td>shadcn/ui + Tailwind</td><td>רכיבים מוכנים, נגישים, RTL out-of-the-box, יפים בלי עיצוב מ-0.</td></tr>
+        <tr><td>State</td><td>Zustand + React Query</td><td>Zustand ל-client state (קל), React Query ל-server state (cache + retry).</td></tr>
+        <tr><td>Excel</td><td>SheetJS (xlsx)</td><td>יצירה בדפדפן, אין דרישת שרת, תמיכה ב-RTL ו-formatting מלא.</td></tr>
+        <tr><td>Hosting</td><td>Vercel</td><td>Edge Functions, deploy אוטומטי מ-Git, free tier מספיק ל-MVP.</td></tr>
+        <tr><td>Email Ingestion</td><td>Cloudflare Email Routing + Workers</td><td>חינם לחלוטין ללא הגבלה. רץ Worker שמפרסר MIME ושולח webhook ל-Vercel.</td></tr>
+        <tr><td>FX Rates</td><td>exchangerate.host</td><td>API חינמי להמרת מטבעות לפי תאריך — לחישוב החזר מדויק בהזמנות חו״ל.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box tip">
+      <span class="info-box-label">למה לא Mobile Native</span>
+      <span>PWA + camera access (<code>&lt;input type="file" accept="image/*" capture&gt;</code>) נותן 95% מחווית האפליקציה הילידית — בלי App Store, בלי Apple Developer license ($99/שנה), בלי build pipeline. אם המשתמשים יבקשו, אפשר לעטוף עם Capacitor אחר כך.</span>
+    </div>
+  </section>
+
+  <!-- 3. Flow -->
+  <section id="flow">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <h2 class="section-title">תהליך עבודה (User Flow)</h2>
+    </div>
+
+    <ol class="flow-steps">
+      <li>
+        <strong>פתיחת האפליקציה</strong>
+        <small>המשתמש פותח את ה-PWA (אייקון במסך הבית או דרך הדפדפן). מסך ראשי: כפתור גדול "צלם קבלה" + רשימת משלוחים אחרונים.</small>
+      </li>
+      <li>
+        <strong>צילום / העלאת קבלה</strong>
+        <small>המצלמה נפתחת ישירות (mobile) או דיאלוג קובץ (desktop). תומך ב-JPG/PNG/HEIC/PDF. אפשר לצלם כמה דפים אם הקבלה ארוכה. לפני שליחה — preview עם אפשרות crop / סיבוב / מחיקה.</small>
+      </li>
+      <li>
+        <strong>חילוץ אוטומטי (OCR)</strong>
+        <small>התמונה נשלחת ל-API שמריץ Gemini Vision עם prompt מובנה. מחזיר JSON: שם החנות, תאריך, רשימת פריטים (שם, כמות, מחיר, סוג מידה). זמן ממוצע: 5-10 שניות. במהלך זה — Loading state עם progress bar.</small>
+      </li>
+      <li>
+        <strong>סקירה ועריכה</strong>
+        <small>המשתמש רואה את הפריטים שחולצו בטבלה עריכה. אפשר: לתקן שם, לשנות כמות, להוסיף פריט שלא זוהה, למחוק פריט שגוי. כפתור "המשך לסימון" כשהכל תקין.</small>
+      </li>
+      <li>
+        <strong>סימון משלוח (Live Tracking)</strong>
+        <small>מסך הצ׳קליסט הראשי — כל פריט מופיע עם תיבת סימון (✓), שדה "כמות שהגיעה" (אם פחות מהמוזמן), ותגיות מהירות: ✅ הגיע במלואו / ⚠️ חלקי / ❌ לא הגיע / 💔 פגום. המשתמש מסמן תוך כדי פריקת המשלוח.</small>
+      </li>
+      <li>
+        <strong>סיכום פערים</strong>
+        <small>אחרי שמסיימים — לוחצים "סיים בדיקה". המערכת מציגה דוח סיכום: כמה פריטים תקינים, כמה חסרים, סך החיוב המגיע להחזר. כפתור גדול: "הכן מייל לשירות לקוחות".</small>
+      </li>
+      <li>
+        <strong>הכנת מייל</strong>
+        <small>מסך עם תצוגה מקדימה של המייל בעברית מקצועית, כולל מספר הזמנה, תאריך, רשימת פערים מסודרת, וסכום ההחזר המבוקש. שלושה כפתורים: "העתק", "פתח באפליקציית מייל", "שתף בוואטסאפ".</small>
+      </li>
+      <li>
+        <strong>שמירה בהיסטוריה</strong>
+        <small>המשלוח נשמר אוטומטית. אפשר לחזור אליו, לראות את הפערים שהיו, לעקוב אם התקבל החזר (סטטוס: pending / refunded / rejected).</small>
+      </li>
+    </ol>
+
+    <div class="info-box success">
+      <span class="info-box-label">UX Goal</span>
+      <span>מצילום ועד מייל מוכן לשליחה — פחות מ-90 שניות. המשתמש בכלל לא צריך להקליד את שמות הפריטים. רק לסמן ולשלוח.</span>
+    </div>
+  </section>
+
+  <!-- 4. Screens -->
+  <section id="screens">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <h2 class="section-title">מסכי המערכת</h2>
+    </div>
+
+    <p>12 מסכים מרכזיים (9 בסיסיים + 3 ל-Inbox Magic). כולם חייבים לתמוך ב-RTL, mobile-first, dark mode (אופציונלי לגרסה 1.5).</p>
+
+    <div class="screen-grid">
+      <div class="screen-card">
+        <div class="screen-num">SCREEN 01</div>
+        <div class="screen-name">Home / Dashboard</div>
+        <div class="screen-desc">CTA ראשי "צלם קבלה חדשה" + רשימת המשלוחים האחרונים עם סטטוס (בבדיקה / סיים / החזר התקבל).</div>
+      </div>
+      <div class="screen-card">
+        <div class="screen-num">SCREEN 02</div>
+        <div class="screen-name">Capture / Upload</div>
+        <div class="screen-desc">פתיחת מצלמה ישירה, אפשרות גלריה / קובץ. תומך multi-page (כמה תמונות לקבלה אחת). preview + crop.</div>
+      </div>
+      <div class="screen-card">
+        <div class="screen-num">SCREEN 03</div>
+        <div class="screen-name">OCR Loading</div>
+        <div class="screen-desc">מסך מעבר עם אנימציה ו-progress states ("מנתח תמונה" / "מחלץ פריטים" / "מסיים..."). זמן ממוצע 5-10 שניות.</div>
+      </div>
+      <div class="screen-card">
+        <div class="screen-num">SCREEN 04</div>
+        <div class="screen-name">Review & Edit Items</div>
+        <div class="screen-desc">טבלת פריטים שחולצו. עריכה inline של שם/כמות/מחיר. כפתור "+ הוסף פריט". Validation על מספרים.</div>
+      </div>
+      <div class="screen-card">
+        <div class="screen-num">SCREEN 05</div>
+        <div class="screen-name">Tracking Checklist</div>
+        <div class="screen-desc">המסך הראשי — צ׳קבוקס לכל פריט, ארבעה סטטוסים (תקין/חלקי/חסר/פגום), שדה כמות שהגיעה, מונה התקדמות חי.</div>
+      </div>
+      <div class="screen-card">
+        <div class="screen-num">SCREEN 06</div>
+        <div class="screen-name">Discrepancy Summary</div>
+        <div class="screen-desc">דוח סיום: 3 KPIs (תקין/חסר/פגום), סכום החזר משוער, רשימת כל הפערים מקובצת לפי סוג.</div>
+      </div>
+      <div class="screen-card">
+        <div class="screen-num">SCREEN 07</div>
+        <div class="screen-name">Email Composer</div>
+        <div class="screen-desc">תצוגת מייל מנוסחת. שדה נמען (אופציונלי), עריכת הטקסט, כפתורי שיתוף (mailto / WhatsApp / העתק).</div>
+      </div>
+      <div class="screen-card">
+        <div class="screen-num">SCREEN 08</div>
+        <div class="screen-name">Delivery History</div>
+        <div class="screen-desc">רשימת כל המשלוחים. סינון לפי חנות / סטטוס / תאריך. סטטיסטיקה: סה״כ ספקים בעייתיים, % משלוחים מושלמים.</div>
+      </div>
+      <div class="screen-card">
+        <div class="screen-num">SCREEN 09</div>
+        <div class="screen-name">Settings & Account</div>
+        <div class="screen-desc">חיבור חשבון Google (אופציונלי לסנכרון), העדפות (שפה, פורמט מייל), ניהול נתונים (ייצוא/מחיקה).</div>
+      </div>
+      <div class="screen-card" style="border-color: var(--cyan); background: rgba(56,196,242,0.04);">
+        <div class="screen-num" style="color: var(--cyan);">SCREEN 10 ✨ NEW</div>
+        <div class="screen-name">Inbox Magic Setup</div>
+        <div class="screen-desc">📨 הצגת כתובת ה-Inbox האישית עם Copy + QR code + הוראות העברת מיילים מ-Gmail/Outlook + כפתור "שלח מייל בדיקה".</div>
+      </div>
+      <div class="screen-card" style="border-color: var(--cyan); background: rgba(56,196,242,0.04);">
+        <div class="screen-num" style="color: var(--cyan);">SCREEN 11 ✨ NEW</div>
+        <div class="screen-name">Email Intakes Inbox</div>
+        <div class="screen-desc">📨 רשימת כל המיילים שנקלטו: סטטוס פיענוח (✅ הצליח / ⚠️ חלקי / ❌ לא זוהה כהזמנה), כפתור "פעל ידנית" לתיקון.</div>
+      </div>
+      <div class="screen-card" style="border-color: var(--cyan); background: rgba(56,196,242,0.04);">
+        <div class="screen-num" style="color: var(--cyan);">SCREEN 12 ✨ NEW</div>
+        <div class="screen-name">Foreign Order View</div>
+        <div class="screen-desc">📨 תצוגה ייחודית להזמנות חו״ל: מטבע מקור + ILS, ETA למשלוח, מע״מ/מכס נפרדים, שערי המרה היסטוריים.</div>
+      </div>
+    </div>
+
+    <div class="info-box tip">
+      <span class="info-box-label">Design Principle</span>
+      <span>מסך 5 (Tracking) הוא ה-MVP. אם המשתמש לא יסיים את המשלוח שם — שום דבר אחר לא משנה. הוא חייב להיות הכי נוח, הכי מהיר, הכי ברור — מותאם לסיטואציה של "אדם עם 30 שקיות מסביב".</span>
+    </div>
+  </section>
+
+  <!-- 5. Data Model -->
+  <section id="data-model">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <h2 class="section-title">מודל נתונים (Supabase / Postgres)</h2>
+    </div>
+
+    <p>סכמה מינימלית של 4 טבלאות. כל טבלה כוללת RLS (Row Level Security) — משתמש יכול לגשת רק למשלוחים שלו.</p>
+
+    <pre><code><span class="cm">-- ╔═══ user_inboxes ═══╗ (NEW — Inbox Magic)</span>
+<span class="kw">CREATE TABLE</span> <span class="type">user_inboxes</span> (
+  <span class="fn">user_id</span>          <span class="type">UUID</span> <span class="kw">PRIMARY KEY REFERENCES</span> auth.users(id) <span class="kw">ON DELETE CASCADE</span>,
+  <span class="fn">inbox_local</span>      <span class="type">TEXT</span> <span class="kw">UNIQUE NOT NULL</span>,         <span class="cm">-- "swift-eagle-42"</span>
+  <span class="fn">inbox_full</span>       <span class="type">TEXT</span> <span class="kw">GENERATED ALWAYS AS</span>           <span class="cm">-- "swift-eagle-42@inbox.doublecheck.app"</span>
+                   (inbox_local <span class="op">||</span> <span class="str">'@inbox.doublecheck.app'</span>) <span class="kw">STORED</span>,
+  <span class="fn">created_at</span>       <span class="type">TIMESTAMPTZ</span> <span class="kw">DEFAULT</span> now(),
+  <span class="fn">last_email_at</span>    <span class="type">TIMESTAMPTZ</span>,
+  <span class="fn">total_emails</span>     <span class="type">INTEGER</span> <span class="kw">DEFAULT</span> <span class="num">0</span>,
+  <span class="fn">is_active</span>        <span class="type">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="kw">true</span>          <span class="cm">-- false אם המשתמש איפס את הכתובת</span>
+);
+
+<span class="cm">-- ╔═══ deliveries ═══╗</span>
+<span class="kw">CREATE TABLE</span> <span class="type">deliveries</span> (
+  <span class="fn">id</span>              <span class="type">UUID</span> <span class="kw">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  <span class="fn">user_id</span>         <span class="type">UUID</span> <span class="kw">REFERENCES</span> auth.users(id) <span class="kw">ON DELETE CASCADE</span>,
+  <span class="fn">source</span>          <span class="type">TEXT</span> <span class="kw">DEFAULT</span> <span class="str">'photo'</span>,           <span class="cm">-- photo | email | extension | manual</span>
+  <span class="fn">store_name</span>      <span class="type">TEXT</span>,                        <span class="cm">-- "רמי לוי", "Amazon", "AliExpress"</span>
+  <span class="fn">vendor_id</span>       <span class="type">TEXT</span>,                        <span class="cm">-- internal vendor key: "amazon_us", "rami_levy"</span>
+  <span class="fn">order_number</span>    <span class="type">TEXT</span>,
+  <span class="fn">order_date</span>      <span class="type">DATE</span>,
+  <span class="fn">delivery_date</span>   <span class="type">DATE</span>,
+  <span class="fn">expected_eta</span>    <span class="type">DATE</span>,                        <span class="cm">-- ETA from email (foreign orders)</span>
+  <span class="fn">original_currency</span> <span class="type">TEXT</span> <span class="kw">DEFAULT</span> <span class="str">'ILS'</span>,       <span class="cm">-- USD/EUR/GBP/ILS/...</span>
+  <span class="fn">original_total</span>  <span class="type">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>),               <span class="cm">-- בסכום המקורי</span>
+  <span class="fn">exchange_rate</span>   <span class="type">DECIMAL</span>(<span class="num">10</span>,<span class="num">4</span>),               <span class="cm">-- שער המרה לתאריך ההזמנה</span>
+  <span class="fn">total_amount</span>    <span class="type">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>),               <span class="cm">-- מחושב ב-ILS תמיד</span>
+  <span class="fn">vat_amount</span>      <span class="type">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>),
+  <span class="fn">customs_amount</span>  <span class="type">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>) <span class="kw">DEFAULT</span> <span class="num">0</span>,
+  <span class="fn">receipt_url</span>     <span class="type">TEXT</span>,                        <span class="cm">-- Supabase Storage path (אם photo)</span>
+  <span class="fn">email_intake_id</span> <span class="type">UUID</span> <span class="kw">REFERENCES</span> email_intakes(id), <span class="cm">-- אם source = email</span>
+  <span class="fn">status</span>          <span class="type">TEXT</span> <span class="kw">DEFAULT</span> <span class="str">'pending'</span>,        <span class="cm">-- pending | reviewing | completed | refunded</span>
+  <span class="fn">refund_status</span>   <span class="type">TEXT</span>,
+  <span class="fn">notes</span>           <span class="type">TEXT</span>,
+  <span class="fn">created_at</span>      <span class="type">TIMESTAMPTZ</span> <span class="kw">DEFAULT</span> now(),
+  <span class="fn">updated_at</span>      <span class="type">TIMESTAMPTZ</span> <span class="kw">DEFAULT</span> now()
+);
+
+<span class="cm">-- ╔═══ email_intakes ═══╗ (NEW — Inbox Magic)</span>
+<span class="kw">CREATE TABLE</span> <span class="type">email_intakes</span> (
+  <span class="fn">id</span>              <span class="type">UUID</span> <span class="kw">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  <span class="fn">user_id</span>         <span class="type">UUID</span> <span class="kw">REFERENCES</span> auth.users(id),
+  <span class="fn">vendor_id</span>       <span class="type">TEXT</span>,                        <span class="cm">-- "amazon_us", "aliexpress", "unknown"</span>
+  <span class="fn">from_address</span>    <span class="type">TEXT</span>,
+  <span class="fn">subject</span>         <span class="type">TEXT</span>,
+  <span class="fn">html_url</span>        <span class="type">TEXT</span>,                        <span class="cm">-- Supabase Storage (raw HTML for debugging)</span>
+  <span class="fn">parsed_status</span>   <span class="type">TEXT</span>,                        <span class="cm">-- success | failed | not_an_order | spam</span>
+  <span class="fn">parser_used</span>     <span class="type">TEXT</span>,                        <span class="cm">-- "vendor_adapter:amazon_us" | "gemini_generic"</span>
+  <span class="fn">confidence</span>      <span class="type">DECIMAL</span>(<span class="num">3</span>,<span class="num">2</span>),                <span class="cm">-- 0.00-1.00</span>
+  <span class="fn">error_msg</span>       <span class="type">TEXT</span>,
+  <span class="fn">received_at</span>     <span class="type">TIMESTAMPTZ</span> <span class="kw">DEFAULT</span> now(),
+  <span class="fn">processed_at</span>    <span class="type">TIMESTAMPTZ</span>
+);
+
+<span class="cm">-- ╔═══ delivery_items ═══╗</span>
+<span class="kw">CREATE TABLE</span> <span class="type">delivery_items</span> (
+  <span class="fn">id</span>              <span class="type">UUID</span> <span class="kw">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  <span class="fn">delivery_id</span>     <span class="type">UUID</span> <span class="kw">REFERENCES</span> deliveries(id) <span class="kw">ON DELETE CASCADE</span>,
+  <span class="fn">position</span>        <span class="type">INTEGER</span>,                     <span class="cm">-- מיקום בקבלה (1, 2, 3...)</span>
+  <span class="fn">sku</span>             <span class="type">TEXT</span>,                        <span class="cm">-- ברקוד / מק״ט אם קיים</span>
+  <span class="fn">name</span>            <span class="type">TEXT</span> <span class="kw">NOT NULL</span>,
+  <span class="fn">unit</span>            <span class="type">TEXT</span>,                        <span class="cm">-- "ק״ג", "יח׳", "ליטר"</span>
+  <span class="fn">ordered_qty</span>     <span class="type">DECIMAL</span>(<span class="num">10</span>,<span class="num">3</span>),               <span class="cm">-- כמות שהוזמנה לפי הקבלה</span>
+  <span class="fn">unit_price</span>      <span class="type">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>),
+  <span class="fn">total_price</span>     <span class="type">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>),
+  <span class="fn">received_qty</span>    <span class="type">DECIMAL</span>(<span class="num">10</span>,<span class="num">3</span>),               <span class="cm">-- כמות שהגיעה בפועל (NULL = טרם נבדק)</span>
+  <span class="fn">status</span>          <span class="type">TEXT</span>,                        <span class="cm">-- ok | partial | missing | damaged | wrong_item</span>
+  <span class="fn">issue_note</span>      <span class="type">TEXT</span>,                        <span class="cm">-- "פג תוקף", "דחוס", "החליפו לי במותג אחר"</span>
+  <span class="fn">photo_url</span>       <span class="type">TEXT</span>,                        <span class="cm">-- ראיה לפגם (אופציונלי)</span>
+  <span class="fn">created_at</span>      <span class="type">TIMESTAMPTZ</span> <span class="kw">DEFAULT</span> now()
+);
+
+<span class="cm">-- ╔═══ user_preferences ═══╗</span>
+<span class="kw">CREATE TABLE</span> <span class="type">user_preferences</span> (
+  <span class="fn">user_id</span>             <span class="type">UUID</span> <span class="kw">PRIMARY KEY REFERENCES</span> auth.users(id),
+  <span class="fn">default_email</span>       <span class="type">TEXT</span>,                    <span class="cm">-- מייל ברירת מחדל לשירות לקוחות</span>
+  <span class="fn">email_signature</span>     <span class="type">TEXT</span>,                    <span class="cm">-- חתימה מותאמת אישית</span>
+  <span class="fn">notification_email</span>  <span class="type">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="kw">true</span>,
+  <span class="fn">language</span>            <span class="type">TEXT</span> <span class="kw">DEFAULT</span> <span class="str">'he'</span>
+);
+
+<span class="cm">-- ╔═══ store_profiles ═══╗ (lookup table)</span>
+<span class="kw">CREATE TABLE</span> <span class="type">store_profiles</span> (
+  <span class="fn">id</span>                  <span class="type">UUID</span> <span class="kw">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  <span class="fn">name</span>                <span class="type">TEXT</span> <span class="kw">UNIQUE NOT NULL</span>,        <span class="cm">-- "רמי לוי", "שופרסל"</span>
+  <span class="fn">support_email</span>       <span class="type">TEXT</span>,                    <span class="cm">-- אימייל שירות לקוחות ידוע</span>
+  <span class="fn">support_phone</span>       <span class="type">TEXT</span>,
+  <span class="fn">refund_form_url</span>     <span class="type">TEXT</span>                     <span class="cm">-- אם יש טופס מקוון</span>
+);
+
+<span class="cm">-- ╔═══ Row Level Security ═══╗</span>
+<span class="kw">ALTER TABLE</span> deliveries <span class="kw">ENABLE ROW LEVEL SECURITY</span>;
+<span class="kw">CREATE POLICY</span> <span class="str">"users_own_deliveries"</span> <span class="kw">ON</span> deliveries
+  <span class="kw">USING</span> (auth.uid() = user_id);
+
+<span class="kw">ALTER TABLE</span> delivery_items <span class="kw">ENABLE ROW LEVEL SECURITY</span>;
+<span class="kw">CREATE POLICY</span> <span class="str">"users_own_items"</span> <span class="kw">ON</span> delivery_items
+  <span class="kw">USING</span> (delivery_id <span class="kw">IN</span> (<span class="kw">SELECT</span> id <span class="kw">FROM</span> deliveries <span class="kw">WHERE</span> user_id = auth.uid()));</code></pre>
+
+    <h3>Item Status Enum</h3>
+    <table>
+      <thead><tr><th>Status</th><th>משמעות</th><th>דוגמה</th></tr></thead>
+      <tbody>
+        <tr><td><code>ok</code></td><td>הגיע במלואו ובסדר</td><td>הוזמן 2 ק״ג עגבניות, הגיעו 2 ק״ג</td></tr>
+        <tr><td><code>partial</code></td><td>הגיע פחות ממה שהוזמן</td><td>הוזמנו 8 יח׳ רוטב, הגיעו 5</td></tr>
+        <tr><td><code>missing</code></td><td>לא הגיע בכלל</td><td>הוזמן ביצים, לא הגיעו</td></tr>
+        <tr><td><code>damaged</code></td><td>הגיע פגום / פג תוקף</td><td>חלב פג תוקף, ירק רקוב</td></tr>
+        <tr><td><code>wrong_item</code></td><td>הוחלף במוצר אחר</td><td>הוזמן יוגורט תות, הגיע יוגורט וניל</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 6. API -->
+  <section id="api">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <h2 class="section-title">API Endpoints</h2>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Method</th><th>Route</th><th>תיאור</th><th>Auth</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>POST</code></td><td><code>/api/ocr</code></td><td>קבלת תמונה, החזרת JSON של פריטים</td><td><span class="tag optional">Optional</span></td></tr>
+        <tr><td><code>POST</code></td><td><code>/api/inbox/webhook</code></td><td>📨 Cloudflare Email Worker → קליטת מייל הזמנה</td><td><span class="tag new">HMAC</span></td></tr>
+        <tr><td><code>POST</code></td><td><code>/api/inbox/regenerate</code></td><td>📨 איפוס כתובת ה-Inbox (אם spam)</td><td><span class="tag required">Required</span></td></tr>
+        <tr><td><code>POST</code></td><td><code>/api/inbox/test</code></td><td>📨 שליחת מייל בדיקה לכתובת המשתמש</td><td><span class="tag required">Required</span></td></tr>
+        <tr><td><code>GET</code></td><td><code>/api/inbox/intakes</code></td><td>📨 רשימת מיילים שנקלטו (עם סטטוס פיענוח)</td><td><span class="tag required">Required</span></td></tr>
+        <tr><td><code>POST</code></td><td><code>/api/deliveries</code></td><td>יצירת משלוח חדש (אחרי OCR)</td><td><span class="tag required">Required</span></td></tr>
+        <tr><td><code>GET</code></td><td><code>/api/deliveries</code></td><td>רשימת כל המשלוחים של המשתמש</td><td><span class="tag required">Required</span></td></tr>
+        <tr><td><code>GET</code></td><td><code>/api/deliveries/:id</code></td><td>משלוח ספציפי + כל הפריטים שלו</td><td><span class="tag required">Required</span></td></tr>
+        <tr><td><code>PATCH</code></td><td><code>/api/deliveries/:id</code></td><td>עדכון סטטוס / הערות</td><td><span class="tag required">Required</span></td></tr>
+        <tr><td><code>PATCH</code></td><td><code>/api/items/:id</code></td><td>סימון פריט (received_qty, status)</td><td><span class="tag required">Required</span></td></tr>
+        <tr><td><code>POST</code></td><td><code>/api/items/:id/photo</code></td><td>העלאת תמונה כראיה לפגם</td><td><span class="tag required">Required</span></td></tr>
+        <tr><td><code>POST</code></td><td><code>/api/email/generate</code></td><td>יצירת טקסט המייל מנוסח</td><td><span class="tag required">Required</span></td></tr>
+        <tr><td><code>GET</code></td><td><code>/api/excel/:id</code></td><td>הורדת Excel של המשלוח</td><td><span class="tag required">Required</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Example: <code>POST /api/ocr</code></h3>
+    <pre><code><span class="cm">// Request</span>
+<span class="kw">interface</span> <span class="type">OcrRequest</span> {
+  <span class="fn">image</span><span class="op">:</span> <span class="type">string</span><span class="op">;</span>      <span class="cm">// base64 or signed URL</span>
+  <span class="fn">mimeType</span><span class="op">:</span> <span class="type">string</span><span class="op">;</span>   <span class="cm">// "image/jpeg" | "application/pdf"</span>
+}
+
+<span class="cm">// Response</span>
+<span class="kw">interface</span> <span class="type">OcrResponse</span> {
+  <span class="fn">success</span><span class="op">:</span> <span class="type">boolean</span><span class="op">;</span>
+  <span class="fn">data</span><span class="op">:</span> {
+    <span class="fn">store_name</span><span class="op">:</span> <span class="type">string</span> <span class="op">|</span> <span class="kw">null</span><span class="op">;</span>
+    <span class="fn">order_number</span><span class="op">:</span> <span class="type">string</span> <span class="op">|</span> <span class="kw">null</span><span class="op">;</span>
+    <span class="fn">order_date</span><span class="op">:</span> <span class="type">string</span> <span class="op">|</span> <span class="kw">null</span><span class="op">;</span>      <span class="cm">// ISO date</span>
+    <span class="fn">total_amount</span><span class="op">:</span> <span class="type">number</span><span class="op">;</span>
+    <span class="fn">vat_amount</span><span class="op">:</span> <span class="type">number</span><span class="op">;</span>
+    <span class="fn">items</span><span class="op">:</span> <span class="type">Array</span><span class="op">&lt;</span>{
+      <span class="fn">position</span><span class="op">:</span> <span class="type">number</span><span class="op">;</span>
+      <span class="fn">sku</span><span class="op">:</span> <span class="type">string</span> <span class="op">|</span> <span class="kw">null</span><span class="op">;</span>
+      <span class="fn">name</span><span class="op">:</span> <span class="type">string</span><span class="op">;</span>
+      <span class="fn">unit</span><span class="op">:</span> <span class="str">"kg"</span> <span class="op">|</span> <span class="str">"unit"</span> <span class="op">|</span> <span class="str">"liter"</span><span class="op">;</span>
+      <span class="fn">ordered_qty</span><span class="op">:</span> <span class="type">number</span><span class="op">;</span>
+      <span class="fn">unit_price</span><span class="op">:</span> <span class="type">number</span><span class="op">;</span>
+      <span class="fn">total_price</span><span class="op">:</span> <span class="type">number</span><span class="op">;</span>
+    }<span class="op">&gt;;</span>
+  }<span class="op">;</span>
+  <span class="fn">confidence</span><span class="op">:</span> <span class="type">number</span><span class="op">;</span>      <span class="cm">// 0-1, אם נמוך מ-0.7 — UI מציג אזהרה</span>
+  <span class="fn">processing_ms</span><span class="op">:</span> <span class="type">number</span><span class="op">;</span>
+}</code></pre>
+
+    <h3>Example: <code>POST /api/email/generate</code></h3>
+    <pre><code><span class="cm">// Request</span>
+<span class="kw">interface</span> <span class="type">GenerateEmailRequest</span> {
+  <span class="fn">delivery_id</span><span class="op">:</span> <span class="type">string</span><span class="op">;</span>
+  <span class="fn">tone</span><span class="op">?:</span> <span class="str">"formal"</span> <span class="op">|</span> <span class="str">"firm"</span> <span class="op">|</span> <span class="str">"friendly"</span><span class="op">;</span>
+  <span class="fn">language</span><span class="op">?:</span> <span class="str">"he"</span> <span class="op">|</span> <span class="str">"en"</span><span class="op">;</span>
+}
+
+<span class="cm">// Response</span>
+<span class="kw">interface</span> <span class="type">GenerateEmailResponse</span> {
+  <span class="fn">subject</span><span class="op">:</span> <span class="type">string</span><span class="op">;</span>
+  <span class="fn">body</span><span class="op">:</span> <span class="type">string</span><span class="op">;</span>           <span class="cm">// פלט מנוסח, מוכן להעתקה</span>
+  <span class="fn">refund_amount</span><span class="op">:</span> <span class="type">number</span><span class="op">;</span>  <span class="cm">// ₪ סך החזר משוער</span>
+  <span class="fn">recipient</span><span class="op">?:</span> <span class="type">string</span><span class="op">;</span>      <span class="cm">// אם החנות מוכרת — מוזן אוטומטית</span>
+}</code></pre>
+  </section>
+
+  <!-- 7. OCR -->
+  <section id="ocr">
+    <div class="section-header">
+      <div class="section-num">7</div>
+      <h2 class="section-title">חילוץ פריטים (OCR Pipeline)</h2>
+    </div>
+
+    <p>החלק הקריטי ביותר באפליקציה. אם החילוץ לא מדויק — המשתמש יזרוק את האפליקציה אחרי הניסיון השני. לכן ה-pipeline הוא 3 שלבים עם בקרת איכות.</p>
+
+    <h3>Stage 1: Pre-processing (Client-side)</h3>
+    <ul>
+      <li>אם תמונה גדולה מ-2MB — דחיסה ל-1920px max (canvas API).</li>
+      <li>HEIC → JPEG conversion עם <code>heic2any</code>.</li>
+      <li>PDF multi-page → רשימת תמונות (PDF.js render).</li>
+      <li>זיהוי אוטומטי של זווית הקבלה ויישור (אופציונלי v2).</li>
+    </ul>
+
+    <h3>Stage 2: Vision API Call</h3>
+    <p>קוראים ל-Gemini 2.5 Flash עם prompt מובנה ו-<code>responseSchema</code>. זה מבטיח שתמיד נקבל JSON תקני, גם אם המודל "מתעצל".</p>
+
+    <pre><code><span class="kw">import</span> { <span class="type">GoogleGenerativeAI</span> } <span class="kw">from</span> <span class="str">"@google/generative-ai"</span><span class="op">;</span>
+
+<span class="kw">const</span> genAI <span class="op">=</span> <span class="kw">new</span> <span class="type">GoogleGenerativeAI</span>(process.env.<span class="fn">GEMINI_API_KEY</span><span class="op">!</span>)<span class="op">;</span>
+<span class="kw">const</span> model <span class="op">=</span> genAI.<span class="fn">getGenerativeModel</span>({
+  <span class="fn">model</span><span class="op">:</span> <span class="str">"gemini-2.5-flash"</span>,
+  <span class="fn">generationConfig</span><span class="op">:</span> {
+    <span class="fn">responseMimeType</span><span class="op">:</span> <span class="str">"application/json"</span>,
+    <span class="fn">responseSchema</span><span class="op">:</span> RECEIPT_SCHEMA<span class="op">,</span>     <span class="cm">// ראה למטה</span>
+    <span class="fn">temperature</span><span class="op">:</span> <span class="num">0.1</span><span class="op">,</span>                  <span class="cm">// נמוך = פחות הזיות</span>
+  },
+})<span class="op">;</span>
+
+<span class="kw">const</span> SYSTEM_PROMPT <span class="op">=</span> <span class="str">`</span>
+<span class="str">אתה מומחה לחילוץ נתונים מקבלות סופרמרקט בעברית.</span>
+<span class="str">חלץ את כל הפריטים מהקבלה במדויק. לכל פריט:</span>
+<span class="str">- שם המוצר (כמו שמופיע, ללא קיצורים)</span>
+<span class="str">- כמות (אם ק״ג — מספר עשרוני, אם יחידות — מספר שלם)</span>
+<span class="str">- מחיר ליחידה</span>
+<span class="str">- מחיר כולל</span>
+<span class="str">- ברקוד אם קיים</span>
+<span class="str"></span>
+<span class="str">אסור להמציא פריטים. אם אינך בטוח — דווח confidence נמוך.</span>
+<span class="str">החזר JSON תקני בלבד, ללא markdown.</span>
+<span class="str">`</span><span class="op">;</span>
+
+<span class="kw">const</span> RECEIPT_SCHEMA <span class="op">=</span> {
+  <span class="fn">type</span><span class="op">:</span> <span class="str">"object"</span>,
+  <span class="fn">properties</span><span class="op">:</span> {
+    <span class="fn">store_name</span><span class="op">:</span> { <span class="fn">type</span><span class="op">:</span> <span class="str">"string"</span>, <span class="fn">nullable</span><span class="op">:</span> <span class="kw">true</span> },
+    <span class="fn">order_number</span><span class="op">:</span> { <span class="fn">type</span><span class="op">:</span> <span class="str">"string"</span>, <span class="fn">nullable</span><span class="op">:</span> <span class="kw">true</span> },
+    <span class="fn">order_date</span><span class="op">:</span> { <span class="fn">type</span><span class="op">:</span> <span class="str">"string"</span>, <span class="fn">format</span><span class="op">:</span> <span class="str">"date"</span> },
+    <span class="fn">total_amount</span><span class="op">:</span> { <span class="fn">type</span><span class="op">:</span> <span class="str">"number"</span> },
+    <span class="fn">vat_amount</span><span class="op">:</span> { <span class="fn">type</span><span class="op">:</span> <span class="str">"number"</span> },
+    <span class="fn">items</span><span class="op">:</span> {
+      <span class="fn">type</span><span class="op">:</span> <span class="str">"array"</span>,
+      <span class="fn">items</span><span class="op">:</span> {
+        <span class="fn">type</span><span class="op">:</span> <span class="str">"object"</span>,
+        <span class="fn">properties</span><span class="op">:</span> {
+          <span class="fn">name</span><span class="op">:</span> { <span class="fn">type</span><span class="op">:</span> <span class="str">"string"</span> },
+          <span class="fn">unit</span><span class="op">:</span> { <span class="fn">type</span><span class="op">:</span> <span class="str">"string"</span>, <span class="fn">enum</span><span class="op">:</span> [<span class="str">"kg"</span>, <span class="str">"unit"</span>, <span class="str">"liter"</span>] },
+          <span class="fn">ordered_qty</span><span class="op">:</span> { <span class="fn">type</span><span class="op">:</span> <span class="str">"number"</span> },
+          <span class="fn">unit_price</span><span class="op">:</span> { <span class="fn">type</span><span class="op">:</span> <span class="str">"number"</span> },
+          <span class="fn">total_price</span><span class="op">:</span> { <span class="fn">type</span><span class="op">:</span> <span class="str">"number"</span> },
+        },
+      },
+    },
+  },
+}<span class="op">;</span>
+
+<span class="kw">const</span> result <span class="op">=</span> <span class="kw">await</span> model.<span class="fn">generateContent</span>([
+  SYSTEM_PROMPT,
+  { <span class="fn">inlineData</span><span class="op">:</span> { <span class="fn">mimeType</span><span class="op">:</span> <span class="str">"image/jpeg"</span>, <span class="fn">data</span><span class="op">:</span> base64Image } }
+])<span class="op">;</span>
+
+<span class="kw">const</span> json <span class="op">=</span> <span class="type">JSON</span>.<span class="fn">parse</span>(result.response.<span class="fn">text</span>())<span class="op">;</span></code></pre>
+
+    <h3>Stage 3: Validation & Confidence Score</h3>
+    <ul>
+      <li><strong>Math check</strong> — sum of all <code>total_price</code> ± 5% from <code>total_amount</code>. אם לא — דגל.</li>
+      <li><strong>Sanity check</strong> — האם כל <code>unit_price × ordered_qty ≈ total_price</code>?</li>
+      <li><strong>Confidence calculation</strong> — מספר הפריטים שעברו את ה-checks חלקי סך הפריטים.</li>
+      <li>אם confidence &lt; 0.7 → ה-UI מציג אזהרה: "ייתכנו אי-דיוקים, אנא בדוק את הרשימה לפני השלב הבא".</li>
+    </ul>
+
+    <div class="info-box warning">
+      <span class="info-box-label">חשוב</span>
+      <span>תמונות עם רזולוציה נמוכה (טלפון ישן, תאורה גרועה) — דיוק ירד ל-70-80%. הפתרון: מסך עזרה עם טיפים לצילום (אור טוב, ישר מלמעלה, רקע נקי). אפשר גם להציע "צלם שוב" אם confidence נמוך מאוד.</span>
+    </div>
+  </section>
+
+  <!-- 8. Inbox Magic -->
+  <section id="inbox-magic">
+    <div class="section-header">
+      <div class="section-num">8</div>
+      <h2 class="section-title">Inbox Magic — קליטת הזמנות במייל 📨</h2>
+    </div>
+
+    <p>זה ה-<strong>Killer Feature</strong> של האפליקציה. במקום לצלם קבלה — המשתמש פשוט מעביר לכתובת מייל ייחודית את אישור ההזמנה (Order Confirmation) שקיבל מאמזון / AliExpress / SHEIN / רמי לוי / כל ספק. המערכת מפענחת את המייל אוטומטית ויוצרת משלוח מוכן למעקב.</p>
+
+    <div class="info-box success">
+      <span class="info-box-label">למה זה משנה הכל</span>
+      <span><strong>אפס חיכוך</strong> — אין צילום, אין OCR, אין הקלדה. <strong>גלובלי</strong> — עובד על כל ספק בעולם, לא רק ספקים מקומיים. <strong>Moat דאטה</strong> — המערכת רואה את כל ההזמנות של כל המשתמשים, בונה profile של ספקים בעייתיים. <strong>Onboarding 10x</strong> — המשתמש מתחיל להפיק ערך תוך 30 שניות במקום לחכות למשלוח הבא.</span>
+    </div>
+
+    <h3>User Flow</h3>
+    <ol class="flow-steps">
+      <li>
+        <strong>קבלת inbox אישי</strong>
+        <small>בהרשמה — המערכת מייצרת לכל משתמש כתובת ייחודית בפורמט <code>[adjective]-[animal]-[N]@inbox.doublecheck.app</code>, למשל <code>swift-eagle-42@inbox.doublecheck.app</code>. ניתן לזכור, בטוח, אנונימי.</small>
+      </li>
+      <li>
+        <strong>הצגה במסך הגדרות</strong>
+        <small>במסך Settings → "Inbox Magic" — המשתמש רואה את הכתובת + כפתור Copy + QR code לסריקה מהמחשב + כפתור "שתף בוואטסאפ לעצמי".</small>
+      </li>
+      <li>
+        <strong>העברת מייל הזמנה</strong>
+        <small>המשתמש מקבל אישור הזמנה מהחנות. לוחץ Forward → מזין את הכתובת האישית → שולח. או: מגדיר Filter ב-Gmail שמעביר אוטומטית כל מייל מ-<code>auto-confirm@amazon.com</code> לכתובת האישית.</small>
+      </li>
+      <li>
+        <strong>קליטה אוטומטית (3-5 שניות)</strong>
+        <small>Cloudflare Email Worker קולט את המייל, מפרסר את ה-MIME, מזהה את הספק לפי <code>From:</code>, ושולח את גוף ה-HTML לפרסר ה-Gemini. במקרה של ספק מוכר — משתמש ב-vendor adapter ייעודי לדיוק של 99%.</small>
+      </li>
+      <li>
+        <strong>Push notification</strong>
+        <small>"📨 הזמנה חדשה זוהתה — Amazon, $87.50, 12 פריטים. הקש לעיון" — המשתמש לוחץ ועובר ישר למסך Review.</small>
+      </li>
+      <li>
+        <strong>אישור והפיכה למעקב</strong>
+        <small>המשתמש בודק שהפריטים נכונים (90%+ זה מושלם), לוחץ "אשר" — וההזמנה מוכנה. בזמן שהמשלוח מגיע (יום / שבוע / חודש בחו״ל), היא יושבת ב-"בהמתנה". כשמסמנים שהמשלוח הגיע — עוברים לצ׳קליסט הסימון.</small>
+      </li>
+    </ol>
+
+    <h3>תמיכה רב-ספקית (Vendor Adapters)</h3>
+    <p>במקום לכתוב parser נפרד לכל ספק — הארכיטקטורה היא <strong>"Generic First"</strong>: Gemini עם prompt גנרי מטפל בכל מייל, ואדפטרים ייעודיים מופעלים רק לספקים בעלי volume גבוה (לדיוק מקסימלי).</p>
+
+    <table>
+      <thead><tr><th>ספק</th><th>זיהוי</th><th>Adapter</th><th>שפות</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Amazon</strong> (US/UK/DE/FR/JP)</td><td>From: <code>*.amazon.*</code></td><td>✅ Native</td><td>EN, DE, FR, JP</td></tr>
+        <tr><td><strong>AliExpress</strong></td><td>From: <code>transaction@notice.aliexpress.com</code></td><td>✅ Native</td><td>EN, RU, ES</td></tr>
+        <tr><td><strong>SHEIN</strong></td><td>From: <code>*@shein.com</code></td><td>✅ Native</td><td>EN, HE, AR</td></tr>
+        <tr><td><strong>Temu</strong></td><td>From: <code>*@shop.temu.com</code></td><td>✅ Native</td><td>EN, HE</td></tr>
+        <tr><td><strong>iHerb</strong></td><td>From: <code>orders@iherb.com</code></td><td>✅ Native</td><td>EN, HE</td></tr>
+        <tr><td><strong>eBay</strong></td><td>From: <code>ebay@ebay.com</code></td><td>✅ Native</td><td>EN</td></tr>
+        <tr><td><strong>רמי לוי</strong></td><td>From: <code>*@rami-levy.co.il</code></td><td>✅ Native (HE)</td><td>HE</td></tr>
+        <tr><td><strong>שופרסל</strong></td><td>From: <code>*@shufersal.co.il</code></td><td>✅ Native (HE)</td><td>HE</td></tr>
+        <tr><td><strong>Wolt Market</strong></td><td>From: <code>orders@wolt.com</code></td><td>✅ Native (HE)</td><td>HE, EN</td></tr>
+        <tr><td><strong>יוחננוף</strong></td><td>From: <code>*@yochananof.co.il</code></td><td>✅ Native (HE)</td><td>HE</td></tr>
+        <tr><td><strong>אחרים</strong></td><td>Any sender</td><td>🤖 Generic Gemini</td><td>Any</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Cloudflare Email Worker (Code)</h3>
+    <pre><code><span class="cm">// /workers/inbox-magic/src/index.ts</span>
+<span class="kw">import</span> PostalMime <span class="kw">from</span> <span class="str">"postal-mime"</span><span class="op">;</span>
+
+<span class="kw">export default</span> {
+  <span class="kw">async</span> <span class="fn">email</span>(message<span class="op">:</span> <span class="type">EmailMessage</span>, env<span class="op">:</span> <span class="type">Env</span>) {
+    <span class="cm">// 1. Parse MIME</span>
+    <span class="kw">const</span> raw <span class="op">=</span> <span class="kw">await</span> <span class="fn">streamToArrayBuffer</span>(message.raw, message.rawSize)<span class="op">;</span>
+    <span class="kw">const</span> parser <span class="op">=</span> <span class="kw">new</span> <span class="type">PostalMime</span>()<span class="op">;</span>
+    <span class="kw">const</span> parsed <span class="op">=</span> <span class="kw">await</span> parser.<span class="fn">parse</span>(raw)<span class="op">;</span>
+
+    <span class="cm">// 2. Extract user from inbox address</span>
+    <span class="kw">const</span> inboxLocal <span class="op">=</span> message.to.<span class="fn">split</span>(<span class="str">"@"</span>)[<span class="num">0</span>]<span class="op">;</span>  <span class="cm">// "swift-eagle-42"</span>
+    <span class="kw">const</span> user <span class="op">=</span> <span class="kw">await</span> env.<span class="fn">SUPABASE</span>.<span class="fn">from</span>(<span class="str">"users"</span>).<span class="fn">select</span>().<span class="fn">eq</span>(<span class="str">"inbox_local"</span>, inboxLocal).<span class="fn">single</span>()<span class="op">;</span>
+    <span class="kw">if</span> (<span class="op">!</span>user) <span class="kw">return</span> message.<span class="fn">setReject</span>(<span class="str">"Unknown inbox"</span>)<span class="op">;</span>
+
+    <span class="cm">// 3. Spam protection — accept only if from known retailer OR Gemini classifies as order</span>
+    <span class="kw">const</span> sender <span class="op">=</span> parsed.from?.address <span class="op">??</span> <span class="str">""</span><span class="op">;</span>
+    <span class="kw">const</span> isKnownRetailer <span class="op">=</span> <span class="fn">matchVendor</span>(sender)<span class="op">;</span>
+
+    <span class="cm">// 4. Forward to Vercel webhook (signed with HMAC)</span>
+    <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">"https://double-check.vercel.app/api/inbox/webhook"</span>, {
+      <span class="fn">method</span><span class="op">:</span> <span class="str">"POST"</span>,
+      <span class="fn">headers</span><span class="op">:</span> {
+        <span class="str">"Content-Type"</span><span class="op">:</span> <span class="str">"application/json"</span>,
+        <span class="str">"X-Inbox-Signature"</span><span class="op">:</span> <span class="kw">await</span> <span class="fn">sign</span>(env.WEBHOOK_SECRET, payload),
+      },
+      <span class="fn">body</span><span class="op">:</span> <span class="type">JSON</span>.<span class="fn">stringify</span>({
+        <span class="fn">user_id</span><span class="op">:</span> user.id,
+        <span class="fn">vendor</span><span class="op">:</span> isKnownRetailer <span class="op">??</span> <span class="str">"unknown"</span>,
+        <span class="fn">subject</span><span class="op">:</span> parsed.subject,
+        <span class="fn">html</span><span class="op">:</span> parsed.html,
+        <span class="fn">text</span><span class="op">:</span> parsed.text,
+        <span class="fn">received_at</span><span class="op">:</span> <span class="kw">new</span> <span class="type">Date</span>().<span class="fn">toISOString</span>(),
+      }),
+    })<span class="op">;</span>
+  },
+}<span class="op">;</span></code></pre>
+
+    <h3>Vercel Webhook Handler (Code)</h3>
+    <pre><code><span class="cm">// /app/api/inbox/webhook/route.ts</span>
+<span class="kw">export async function</span> <span class="fn">POST</span>(req<span class="op">:</span> <span class="type">Request</span>) {
+  <span class="cm">// 1. Verify HMAC signature (reject forged webhooks)</span>
+  <span class="kw">const</span> sig <span class="op">=</span> req.headers.<span class="fn">get</span>(<span class="str">"X-Inbox-Signature"</span>)<span class="op">;</span>
+  <span class="kw">const</span> body <span class="op">=</span> <span class="kw">await</span> req.<span class="fn">text</span>()<span class="op">;</span>
+  <span class="kw">if</span> (<span class="op">!</span><span class="fn">verifyHmac</span>(sig, body, process.env.WEBHOOK_SECRET<span class="op">!</span>)) {
+    <span class="kw">return new</span> <span class="type">Response</span>(<span class="str">"Forbidden"</span>, { <span class="fn">status</span><span class="op">:</span> <span class="num">403</span> })<span class="op">;</span>
+  }
+
+  <span class="kw">const</span> { user_id, vendor, html, text, subject } <span class="op">=</span> <span class="type">JSON</span>.<span class="fn">parse</span>(body)<span class="op">;</span>
+
+  <span class="cm">// 2. Run vendor adapter OR Gemini fallback</span>
+  <span class="kw">const</span> adapter <span class="op">=</span> VENDOR_ADAPTERS[vendor]<span class="op">;</span>
+  <span class="kw">const</span> extracted <span class="op">=</span> adapter
+    ? <span class="kw">await</span> adapter.<span class="fn">parse</span>({ html, text, subject })
+    : <span class="kw">await</span> <span class="fn">extractWithGemini</span>({ html, text, subject })<span class="op">;</span>
+
+  <span class="cm">// 3. Currency conversion if foreign</span>
+  <span class="kw">if</span> (extracted.currency <span class="op">!==</span> <span class="str">"ILS"</span>) {
+    <span class="kw">const</span> rate <span class="op">=</span> <span class="kw">await</span> <span class="fn">getExchangeRate</span>(extracted.currency, <span class="str">"ILS"</span>, extracted.order_date)<span class="op">;</span>
+    extracted.exchange_rate <span class="op">=</span> rate<span class="op">;</span>
+    extracted.ils_total <span class="op">=</span> extracted.original_total <span class="op">*</span> rate<span class="op">;</span>
+  }
+
+  <span class="cm">// 4. Save to Supabase + send push notification</span>
+  <span class="kw">const</span> delivery <span class="op">=</span> <span class="kw">await</span> <span class="fn">saveDelivery</span>(user_id, { ...extracted, source<span class="op">:</span> <span class="str">"email"</span> })<span class="op">;</span>
+  <span class="kw">await</span> <span class="fn">sendPush</span>(user_id, { title<span class="op">:</span> <span class="str">"📨 הזמנה חדשה זוהתה"</span>, delivery_id<span class="op">:</span> delivery.id })<span class="op">;</span>
+
+  <span class="kw">return</span> <span class="type">Response</span>.<span class="fn">json</span>({ ok<span class="op">:</span> <span class="kw">true</span>, delivery_id<span class="op">:</span> delivery.id })<span class="op">;</span>
+}</code></pre>
+
+    <h3>Gemini Generic Email Parser</h3>
+    <p>למיילים שאין להם adapter ייעודי — Gemini Pro עם prompt מובנה. ההבדל מ-Vision OCR: כאן הקלט הוא <strong>HTML/טקסט מובנה</strong> במקום תמונה — כלומר דיוק גבוה יותר ומחיר נמוך יותר.</p>
+
+    <pre><code><span class="kw">const</span> EMAIL_EXTRACTION_PROMPT <span class="op">=</span> <span class="str">`</span>
+<span class="str">אתה מומחה לחילוץ נתוני הזמנה מאישור מייל של חנויות מקוונות.</span>
+<span class="str">הקלט: HTML או טקסט של אישור הזמנה (Order Confirmation).</span>
+<span class="str">המייל יכול להיות בכל שפה (אנגלית, עברית, סינית, רוסית).</span>
+<span class="str"></span>
+<span class="str">חלץ:</span>
+<span class="str">1. שם החנות (Amazon, AliExpress, etc.)</span>
+<span class="str">2. מספר הזמנה</span>
+<span class="str">3. תאריך הזמנה (ISO 8601)</span>
+<span class="str">4. מטבע (USD/EUR/GBP/ILS/etc.)</span>
+<span class="str">5. סכום כולל במטבע המקור</span>
+<span class="str">6. רשימת פריטים: שם, כמות, מחיר ליחידה, מחיר כולל</span>
+<span class="str">7. תאריך משלוח משוער (אם מצוין)</span>
+<span class="str"></span>
+<span class="str">אם זה לא אישור הזמנה (פרסומת, עדכון משלוח, ניוזלטר) — החזר {is_order: false}.</span>
+<span class="str">החזר JSON תקני בלבד.</span>
+<span class="str">`</span><span class="op">;</span></code></pre>
+
+    <h3>Spam &amp; Abuse Protection</h3>
+    <ul>
+      <li><strong>Whitelist of known retailers</strong> — אם ה-<code>From:</code> מתאים לרשימת ספקים ידועים, מקבלים אוטומטית.</li>
+      <li><strong>Gemini classifier</strong> — לכתובת לא מוכרת, Gemini מקבל את המייל ומחזיר <code>is_order_confirmation: true|false</code>. רק אם <code>true</code> — ממשיכים.</li>
+      <li><strong>Rate limiting</strong> — מקס׳ 50 מיילים/יום למשתמש (חוסם botnet abuse).</li>
+      <li><strong>SPF/DKIM verification</strong> — Cloudflare מבצעת את זה אוטומטית. מיילים falsified נדחים.</li>
+      <li><strong>Disposable inbox rotation</strong> — המשתמש יכול לאפס את הכתובת בלחיצה (אם spam).</li>
+    </ul>
+
+    <h3>Multi-Currency &amp; FX</h3>
+    <p>לכל הזמנה לא-ישראלית, השדות הנוספים:</p>
+    <pre><code><span class="kw">interface</span> <span class="type">CurrencyInfo</span> {
+  <span class="fn">original_currency</span><span class="op">:</span> <span class="type">string</span><span class="op">;</span>      <span class="cm">// "USD"</span>
+  <span class="fn">original_total</span><span class="op">:</span> <span class="type">number</span><span class="op">;</span>         <span class="cm">// 87.50</span>
+  <span class="fn">exchange_rate</span><span class="op">:</span> <span class="type">number</span><span class="op">;</span>          <span class="cm">// 3.62 (USD→ILS at order date)</span>
+  <span class="fn">ils_total</span><span class="op">:</span> <span class="type">number</span><span class="op">;</span>              <span class="cm">// 316.75</span>
+  <span class="fn">vat_paid_ils</span><span class="op">:</span> <span class="type">number</span><span class="op">;</span>           <span class="cm">// 53.85 (אם שולם מע״מ בכניסה לארץ)</span>
+  <span class="fn">customs_paid_ils</span><span class="op">:</span> <span class="type">number</span><span class="op">;</span>       <span class="cm">// 0 (אם פטור מתחת ל-$75)</span>
+}</code></pre>
+    <p>בהכנת דוח הפערים — הסכום מוצג בשני המטבעות: <em>"חוסר של 12 USD ≈ 43.40 ₪ לפי שער 3.62 בתאריך 07/05/2026"</em>. זה חוסך למשתמש את הוויכוח עם שירות הלקוחות על ה"שער הנכון".</p>
+
+    <h3>Setup Flow ראשון של המשתמש</h3>
+    <ol class="flow-steps">
+      <li><strong>הרשמה</strong><br><small>המשתמש נרשם — המערכת מייצרת אוטומטית כתובת ייחודית.</small></li>
+      <li><strong>מסך הסבר 1-Step</strong><br><small>"הנה הכתובת שלך. שלוש אופציות לשימוש:" + 3 צעדים.</small></li>
+      <li><strong>שליחת מייל בדיקה</strong><br><small>כפתור "שלח מייל בדיקה" — שולח לכתובת מייל דמה כדי לראות שהכל עובד תוך 5 שניות.</small></li>
+      <li><strong>הוראות פילטר Gmail אופציונלי</strong><br><small>"רוצה אוטומציה מלאה? הנה הוראות להגדיר ב-Gmail פילטר שמעביר אוטומטית כל מייל מאמזון/AliExpress לכתובת שלך."</small></li>
+    </ol>
+
+    <div class="info-box warning">
+      <span class="info-box-label">DNS Setup Required</span>
+      <span>צריך לרכוש דומיין משלנו (כמו <code>doublecheck.app</code>) ולחבר אותו ל-Cloudflare. עלות: ~$10/שנה. זה ה-only cost הקבוע. לאחר חיבור — Cloudflare Email Routing קולט את כל המיילים בחינם, ללא הגבלה.</span>
+    </div>
+  </section>
+
+  <!-- 9. Email -->
+  <section id="email">
+    <div class="section-header">
+      <div class="section-num">9</div>
+      <h2 class="section-title">דוח פערים — Email Generation</h2>
+    </div>
+
+    <p>זה ה-Killer Feature. אחרי שהמשתמש סיים לסמן — הוא צריך להעתיק טקסט מקצועי, מסודר, ומוכן לשליחה למייל / וואטסאפ. הטקסט נוצר אוטומטית מהנתונים — אין צורך ב-AI generation, רק template מילולי חכם.</p>
+
+    <h3>Template Structure</h3>
+    <pre><code><span class="cm">// pseudocode of the generation logic</span>
+<span class="kw">function</span> <span class="fn">generateEmail</span>(delivery<span class="op">:</span> <span class="type">Delivery</span>, items<span class="op">:</span> <span class="type">Item</span>[]) {
+  <span class="kw">const</span> missing  <span class="op">=</span> items.<span class="fn">filter</span>(i <span class="op">=&gt;</span> i.status <span class="op">===</span> <span class="str">"missing"</span>)<span class="op">;</span>
+  <span class="kw">const</span> partial  <span class="op">=</span> items.<span class="fn">filter</span>(i <span class="op">=&gt;</span> i.status <span class="op">===</span> <span class="str">"partial"</span>)<span class="op">;</span>
+  <span class="kw">const</span> damaged  <span class="op">=</span> items.<span class="fn">filter</span>(i <span class="op">=&gt;</span> i.status <span class="op">===</span> <span class="str">"damaged"</span>)<span class="op">;</span>
+  <span class="kw">const</span> wrong    <span class="op">=</span> items.<span class="fn">filter</span>(i <span class="op">=&gt;</span> i.status <span class="op">===</span> <span class="str">"wrong_item"</span>)<span class="op">;</span>
+
+  <span class="kw">const</span> refund <span class="op">=</span>
+    missing.<span class="fn">reduce</span>((s, i) <span class="op">=&gt;</span> s <span class="op">+</span> i.total_price, <span class="num">0</span>) <span class="op">+</span>
+    partial.<span class="fn">reduce</span>((s, i) <span class="op">=&gt;</span> s <span class="op">+</span> i.unit_price <span class="op">*</span> (i.ordered_qty <span class="op">-</span> i.received_qty), <span class="num">0</span>) <span class="op">+</span>
+    damaged.<span class="fn">reduce</span>((s, i) <span class="op">=&gt;</span> s <span class="op">+</span> i.total_price, <span class="num">0</span>)<span class="op">;</span>
+
+  <span class="kw">return</span> {
+    <span class="fn">subject</span><span class="op">:</span> <span class="str">`פערים בהזמנה ${delivery.order_number} מתאריך ${delivery.order_date}`</span>,
+    <span class="fn">body</span><span class="op">:</span> <span class="fn">renderTemplate</span>({ delivery, missing, partial, damaged, wrong, refund }),
+    <span class="fn">refund_amount</span><span class="op">:</span> refund,
+  }<span class="op">;</span>
+}</code></pre>
+
+    <h3>Example Output</h3>
+    <p>כך ייראה המייל המוכן להעתקה:</p>
+
+    <div class="email-preview">
+      <div class="email-subject">נושא: פערים בהזמנה #2019794 מתאריך 07/05/2026</div>
+      <p>שלום,</p>
+      <p>קיבלתי היום את ההזמנה (מספר הזמנה: <strong>2019794</strong>, תאריך הזמנה: 07/05/2026). לאחר בדיקה מקיפה של המשלוח מול הקבלה, אני מבקש לדווח על הפערים הבאים:</p>
+
+      <h4 style="color:#F05680; margin-top:14px;">פריטים חסרים לחלוטין (3):</h4>
+      <ul>
+        <li class="gap-item gap-missing">• <strong>סלט מטבוחה אחלה 500 גרם</strong> — 1 יח׳ — 14.90 ₪</li>
+        <li class="gap-item gap-missing">• <strong>פטריות שמג׳י חוות תקוע 150 גרם</strong> — 1 יח׳ — 7.40 ₪</li>
+        <li class="gap-item gap-missing">• <strong>שרי קלמרס</strong> — 1 יח׳ — 10.00 ₪</li>
+      </ul>
+
+      <h4 style="color:#fbbf24; margin-top:14px;">פריטים שהגיעו בכמות חלקית (1):</h4>
+      <ul>
+        <li class="gap-item gap-partial">• <strong>פרניר רוטב עגבניות 100 גר 22BX</strong> — הוזמנו 8 יח׳, הגיעו 5 יח׳ — חוסר של 3 יח׳ (7.20 ₪)</li>
+      </ul>
+
+      <h4 style="color:#3b5cb8; margin-top:14px;">פריטים פגומים / פגי תוקף (1):</h4>
+      <ul>
+        <li class="gap-item gap-damaged">• <strong>עד חצות חלב 200 גרם</strong> — 1 יח׳ פג תוקף — 15.00 ₪</li>
+      </ul>
+
+      <p style="margin-top:14px;"><strong>סה״כ סכום החזר מבוקש: 54.50 ₪</strong></p>
+      <p>אשמח לקבל החזר כספי / זיכוי / משלוח חוזר של הפריטים החסרים.</p>
+      <p>מצורפת הקבלה המלאה לעיון. אני זמין לכל שאלה או הבהרה.</p>
+      <p>תודה,<br><strong>אלון גבאי</strong></p>
+    </div>
+
+    <h3>שלוש גרסאות טון</h3>
+    <table>
+      <thead><tr><th>טון</th><th>סגנון</th><th>שימוש</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Friendly</strong></td><td>חברי, גמיש, "תודה מראש על הטיפול"</td><td>ספק שאני אוהב, רוצה לשמור על קשר טוב</td></tr>
+        <tr><td><strong>Formal</strong></td><td>עסקי, מקצועי (ברירת מחדל)</td><td>רוב המקרים</td></tr>
+        <tr><td><strong>Firm</strong></td><td>תקיף, מתבסס על חוק הגנת הצרכן</td><td>אחרי שלא הגיבו / משלוח שני בעייתי</td></tr>
+      </tbody>
+    </table>
+
+    <h3>פעולות שיתוף</h3>
+    <ul>
+      <li><code>📋 העתק לקליפבורד</code> — Clipboard API.</li>
+      <li><code>📧 פתח באפליקציית מייל</code> — <code>mailto:?subject=...&body=...</code></li>
+      <li><code>💬 שלח בוואטסאפ</code> — <code>https://wa.me/?text=...</code></li>
+      <li><code>📎 צרף Excel</code> — מייצר קובץ ומצרף (ב-mobile via Web Share API)</li>
+    </ul>
+  </section>
+
+  <!-- 10. Integrations -->
+  <section id="integrations">
+    <div class="section-header">
+      <div class="section-num">10</div>
+      <h2 class="section-title">אינטגרציות</h2>
+    </div>
+
+    <table>
+      <thead><tr><th>שירות</th><th>תפקיד</th><th>SDK</th><th>עלות</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Google Gemini</strong></td>
+          <td>Vision OCR + Item Extraction + Email Parsing</td>
+          <td><code>@google/generative-ai</code></td>
+          <td><span class="tag free">Free tier</span> 1500 req/day</td>
+        </tr>
+        <tr style="background: rgba(56,196,242,0.04);">
+          <td><strong>Cloudflare Email Routing</strong> <span class="tag new">📨</span></td>
+          <td>קליטת מיילים ל-inbox.doublecheck.app</td>
+          <td>Cloudflare Workers (Email Worker)</td>
+          <td><span class="tag free">Free</span> ללא הגבלה</td>
+        </tr>
+        <tr style="background: rgba(56,196,242,0.04);">
+          <td><strong>postal-mime</strong> <span class="tag new">📨</span></td>
+          <td>פירוק MIME של מיילים נכנסים</td>
+          <td><code>postal-mime</code></td>
+          <td><span class="tag free">Open source</span></td>
+        </tr>
+        <tr style="background: rgba(56,196,242,0.04);">
+          <td><strong>exchangerate.host</strong> <span class="tag new">📨</span></td>
+          <td>שערי המרה היסטוריים (USD/EUR → ILS)</td>
+          <td>REST API</td>
+          <td><span class="tag free">Free</span> ללא רישום</td>
+        </tr>
+        <tr style="background: rgba(56,196,242,0.04);">
+          <td><strong>Web Push (VAPID)</strong> <span class="tag new">📨</span></td>
+          <td>הודעות "📨 הזמנה חדשה זוהתה"</td>
+          <td><code>web-push</code></td>
+          <td><span class="tag free">Open source</span></td>
+        </tr>
+        <tr>
+          <td><strong>Supabase</strong></td>
+          <td>Postgres + Storage + Auth</td>
+          <td><code>@supabase/supabase-js</code></td>
+          <td><span class="tag free">Free tier</span> 500MB DB + 1GB Storage</td>
+        </tr>
+        <tr>
+          <td><strong>Vercel</strong></td>
+          <td>Hosting + Edge Functions</td>
+          <td>Native (Next.js)</td>
+          <td><span class="tag free">Hobby plan</span> 100GB bandwidth</td>
+        </tr>
+        <tr>
+          <td><strong>SheetJS</strong></td>
+          <td>Excel generation in-browser</td>
+          <td><code>xlsx</code></td>
+          <td><span class="tag free">Open source</span></td>
+        </tr>
+        <tr>
+          <td><strong>next-pwa</strong></td>
+          <td>Service Worker + manifest</td>
+          <td><code>@ducanh2912/next-pwa</code></td>
+          <td><span class="tag free">Open source</span></td>
+        </tr>
+        <tr>
+          <td><strong>shadcn/ui</strong></td>
+          <td>UI components</td>
+          <td>copy-paste components</td>
+          <td><span class="tag free">Open source</span></td>
+        </tr>
+        <tr>
+          <td><strong>react-hook-form + zod</strong></td>
+          <td>Forms & validation</td>
+          <td><code>react-hook-form</code>, <code>zod</code></td>
+          <td><span class="tag free">Open source</span></td>
+        </tr>
+        <tr>
+          <td><strong>Sentry</strong></td>
+          <td>Error tracking (optional)</td>
+          <td><code>@sentry/nextjs</code></td>
+          <td><span class="tag free">Free tier</span> 5K events/month</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="info-box success">
+      <span class="info-box-label">עלות חודשית ל-MVP</span>
+      <span>~$1/חודש בלבד — רק לדומיין (<code>doublecheck.app</code>) שעולה ~$10/שנה. כל שאר ה-stack בנוי על free tiers. מתחילים לשלם רק מעל 1500 משלוחים ביום או 500MB Postgres — נקודות שלא מגיעים אליהן ב-3 חודשים ראשונים. ה-Email Routing של Cloudflare חינמי ללא הגבלה.</span>
+    </div>
+  </section>
+
+  <!-- 11. Roadmap -->
+  <section id="roadmap">
+    <div class="section-header">
+      <div class="section-num">11</div>
+      <h2 class="section-title">מפת דרכים</h2>
+    </div>
+
+    <div class="phase">
+      <div class="phase-title">Phase 1 — MVP Core <span class="phase-duration">3 שבועות</span></div>
+      <ul>
+        <li>Setup: Next.js 15, Tailwind, shadcn/ui, Supabase project</li>
+        <li>Auth: anonymous mode + Google login</li>
+        <li>Capture screen: camera + gallery + multi-page</li>
+        <li>OCR: Gemini integration + JSON schema + validation</li>
+        <li>Review screen: edit items inline</li>
+        <li>Tracking screen: checkbox list עם 5 statuses</li>
+        <li>Discrepancy summary: KPIs + grouped list</li>
+        <li>Email generator (Hebrew template, formal tone only)</li>
+        <li>Mailto / WhatsApp / Clipboard share</li>
+      </ul>
+    </div>
+
+    <div class="phase" style="border-color: var(--cyan); background: rgba(56,196,242,0.06);">
+      <div class="phase-title">Phase 2 — Inbox Magic 📨 <span class="phase-duration">3 שבועות</span></div>
+      <ul>
+        <li>רכישת דומיין <code>doublecheck.app</code> + הגדרת Cloudflare Email Routing</li>
+        <li>Cloudflare Email Worker — MIME parsing + HMAC webhook</li>
+        <li>Vercel webhook handler — vendor detection + Gemini fallback</li>
+        <li>5 vendor adapters ראשונים: Amazon, AliExpress, רמי לוי, שופרסל, iHerb</li>
+        <li>טבלאות חדשות: <code>user_inboxes</code>, <code>email_intakes</code></li>
+        <li>Settings: מסך Inbox Magic + Copy + QR + מייל בדיקה</li>
+        <li>Email Intakes Inbox screen — רשימת מיילים שנקלטו עם סטטוס</li>
+        <li>Web Push notifications: "📨 הזמנה חדשה זוהתה"</li>
+        <li>Multi-currency support: original_currency + exchange_rate</li>
+        <li>Spam protection: whitelist + Gemini classifier + rate limit</li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-title">Phase 3 — PWA + History <span class="phase-duration">שבועיים</span></div>
+      <ul>
+        <li>next-pwa setup + Service Worker</li>
+        <li>Offline mode (IndexedDB cache)</li>
+        <li>Add-to-Homescreen prompts (iOS + Android)</li>
+        <li>Delivery History screen + filters (לפי source: photo/email/all)</li>
+        <li>Excel export (SheetJS) — תמיכה במטבעות זרים בקובץ</li>
+        <li>Photo upload for damaged items</li>
+        <li>Foreign Order View screen — תצוגה ייחודית לחו״ל</li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-title">Phase 4 — Polish & Intelligence <span class="phase-duration">שבועיים</span></div>
+      <ul>
+        <li>3 email tones (friendly / formal / firm)</li>
+        <li>Store profiles auto-detect — vendor adapters נוספים (Temu, SHEIN, eBay, Wolt)</li>
+        <li>Auto-fill support email from store_profiles table</li>
+        <li>Refund tracking (status: requested / partial / full / rejected)</li>
+        <li>Statistics dashboard (top problematic stores, monthly refund total, vendors per source)</li>
+        <li>Crowdsourced trust score (אנונימי: % הזמנות בעייתיות לכל ספק)</li>
+        <li>Onboarding flow (5 screens — כולל הסבר Inbox Magic)</li>
+        <li>Sentry integration + error boundary</li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-title">Phase 5 — Growth Features <span class="phase-duration">v2.0</span></div>
+      <ul>
+        <li>Family / Team accounts (multi-user delivery sharing)</li>
+        <li>Browser extension (Chrome / Firefox) — תפיסת הזמנה ב-checkout</li>
+        <li>WhatsApp bot — שליחת קבלה לבוט במקום פתיחת אפליקציה</li>
+        <li>Voice mode בזמן פריקה — "רוטב לא הגיע" → סימון אוטומטי</li>
+        <li>Auto-escalation — מייל שני אוטומטי אם החנות לא ענתה תוך 7 ימים</li>
+        <li>Receipt re-OCR if user marks low confidence</li>
+        <li>Hebrew + English + Arabic UI</li>
+        <li>Capacitor wrapper → App Store / Play Store</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 12. Components -->
+  <section id="components">
+    <div class="section-header">
+      <div class="section-num">12</div>
+      <h2 class="section-title">רכיבי ממשק (File Structure)</h2>
+    </div>
+
+    <pre><code><span class="cm">// Next.js App Router structure</span>
+<span class="fn">app/</span>
+├── <span class="type">layout.tsx</span>                 <span class="cm">// RTL, Heebo font, PWA meta</span>
+├── <span class="type">page.tsx</span>                   <span class="cm">// Home / Dashboard</span>
+├── <span class="type">manifest.ts</span>                <span class="cm">// PWA manifest</span>
+├── <span class="fn">(auth)/</span>
+│   ├── <span class="fn">login/</span><span class="type">page.tsx</span>
+│   └── <span class="fn">callback/</span><span class="type">route.ts</span>
+├── <span class="fn">delivery/</span>
+│   ├── <span class="fn">new/</span><span class="type">page.tsx</span>            <span class="cm">// Capture screen</span>
+│   ├── <span class="fn">[id]/</span>
+│   │   ├── <span class="type">page.tsx</span>            <span class="cm">// Tracking checklist</span>
+│   │   ├── <span class="fn">review/</span><span class="type">page.tsx</span>     <span class="cm">// Edit OCR results</span>
+│   │   ├── <span class="fn">summary/</span><span class="type">page.tsx</span>    <span class="cm">// Discrepancy summary</span>
+│   │   └── <span class="fn">email/</span><span class="type">page.tsx</span>       <span class="cm">// Email composer</span>
+│   └── <span class="fn">history/</span><span class="type">page.tsx</span>
+├── <span class="fn">settings/</span><span class="type">page.tsx</span>
+└── <span class="fn">api/</span>
+    ├── <span class="fn">ocr/</span><span class="type">route.ts</span>
+    ├── <span class="fn">inbox/</span>                       <span class="cm">// 📨 Inbox Magic</span>
+    │   ├── <span class="fn">webhook/</span><span class="type">route.ts</span>          <span class="cm">// Cloudflare → Vercel webhook</span>
+    │   ├── <span class="fn">regenerate/</span><span class="type">route.ts</span>       <span class="cm">// איפוס כתובת</span>
+    │   ├── <span class="fn">test/</span><span class="type">route.ts</span>             <span class="cm">// שליחת מייל בדיקה</span>
+    │   └── <span class="fn">intakes/</span><span class="type">route.ts</span>          <span class="cm">// רשימת מיילים שנקלטו</span>
+    ├── <span class="fn">deliveries/</span>
+    │   ├── <span class="type">route.ts</span>
+    │   └── <span class="fn">[id]/</span><span class="type">route.ts</span>
+    ├── <span class="fn">items/</span><span class="fn">[id]/</span><span class="type">route.ts</span>
+    ├── <span class="fn">email/</span><span class="fn">generate/</span><span class="type">route.ts</span>
+    └── <span class="fn">excel/</span><span class="fn">[id]/</span><span class="type">route.ts</span>
+
+<span class="fn">components/</span>
+├── <span class="fn">ui/</span>                            <span class="cm">// shadcn primitives</span>
+│   ├── <span class="type">button.tsx</span>, <span class="type">card.tsx</span>, <span class="type">input.tsx</span>, <span class="type">checkbox.tsx</span>...
+├── <span class="fn">capture/</span>
+│   ├── <span class="type">CameraInput.tsx</span>          <span class="cm">// camera + gallery + multi-page</span>
+│   ├── <span class="type">ImagePreview.tsx</span>         <span class="cm">// crop, rotate, delete</span>
+│   └── <span class="type">UploadButton.tsx</span>
+├── <span class="fn">tracking/</span>
+│   ├── <span class="type">ItemRow.tsx</span>              <span class="cm">// סימון פריט (THE main component)</span>
+│   ├── <span class="type">StatusBadge.tsx</span>          <span class="cm">// ok/partial/missing/damaged/wrong</span>
+│   ├── <span class="type">ProgressHeader.tsx</span>       <span class="cm">// "12/23 הושלם"</span>
+│   └── <span class="type">QuantityInput.tsx</span>        <span class="cm">// numeric stepper</span>
+├── <span class="fn">summary/</span>
+│   ├── <span class="type">KpiCards.tsx</span>             <span class="cm">// 3 cards: ok / missing / damaged</span>
+│   ├── <span class="type">DiscrepancyList.tsx</span>      <span class="cm">// grouped by status</span>
+│   └── <span class="type">RefundEstimate.tsx</span>
+├── <span class="fn">email/</span>
+│   ├── <span class="type">EmailPreview.tsx</span>         <span class="cm">// rendered template</span>
+│   ├── <span class="type">ToneToggle.tsx</span>           <span class="cm">// friendly/formal/firm</span>
+│   └── <span class="type">ShareActions.tsx</span>         <span class="cm">// copy/mailto/WhatsApp</span>
+└── <span class="fn">shared/</span>
+    ├── <span class="type">AppShell.tsx</span>              <span class="cm">// header + bottom-nav (mobile)</span>
+    ├── <span class="type">EmptyState.tsx</span>
+    └── <span class="type">LoadingSpinner.tsx</span>
+
+<span class="fn">lib/</span>
+├── <span class="fn">supabase/</span>
+│   ├── <span class="type">client.ts</span>                 <span class="cm">// browser client</span>
+│   ├── <span class="type">server.ts</span>                 <span class="cm">// server client</span>
+│   └── <span class="type">middleware.ts</span>             <span class="cm">// auth middleware</span>
+├── <span class="fn">ocr/</span>
+│   ├── <span class="type">gemini.ts</span>                 <span class="cm">// Gemini client + prompts</span>
+│   ├── <span class="type">schema.ts</span>                 <span class="cm">// JSON schema for receipt</span>
+│   └── <span class="type">validate.ts</span>               <span class="cm">// confidence scoring</span>
+├── <span class="fn">email/</span>
+│   ├── <span class="type">templates.ts</span>              <span class="cm">// Hebrew templates per tone</span>
+│   └── <span class="type">render.ts</span>                 <span class="cm">// data → string</span>
+├── <span class="fn">inbox/</span>                          <span class="cm">// 📨 Inbox Magic</span>
+│   ├── <span class="type">vendor-detect.ts</span>          <span class="cm">// match From: → vendor_id</span>
+│   ├── <span class="type">adapters/</span>                 <span class="cm">// vendor-specific parsers</span>
+│   │   ├── <span class="type">amazon.ts</span>, <span class="type">aliexpress.ts</span>, <span class="type">shein.ts</span>
+│   │   ├── <span class="type">rami-levy.ts</span>, <span class="type">shufersal.ts</span>, <span class="type">wolt.ts</span>
+│   │   └── <span class="type">iherb.ts</span>, <span class="type">temu.ts</span>, <span class="type">ebay.ts</span>
+│   ├── <span class="type">gemini-generic.ts</span>         <span class="cm">// fallback parser</span>
+│   ├── <span class="type">classifier.ts</span>             <span class="cm">// is this an order confirmation?</span>
+│   ├── <span class="type">inbox-generator.ts</span>        <span class="cm">// random readable: swift-eagle-42</span>
+│   └── <span class="type">fx.ts</span>                     <span class="cm">// historical exchange rates</span>
+├── <span class="fn">excel/</span>
+│   └── <span class="type">generate.ts</span>               <span class="cm">// SheetJS workbook builder</span>
+├── <span class="fn">stores/</span>
+│   ├── <span class="type">delivery-store.ts</span>         <span class="cm">// Zustand: current delivery state</span>
+│   └── <span class="type">offline-store.ts</span>          <span class="cm">// IndexedDB sync</span>
+└── <span class="fn">utils/</span>
+    ├── <span class="type">format.ts</span>                 <span class="cm">// ₪, dates, qty</span>
+    └── <span class="type">image.ts</span>                  <span class="cm">// resize, HEIC convert</span>
+
+<span class="fn">public/</span>
+├── <span class="type">icon-192.png</span>, <span class="type">icon-512.png</span>   <span class="cm">// PWA icons</span>
+├── <span class="type">apple-touch-icon.png</span>
+└── <span class="type">screenshots/</span>                <span class="cm">// PWA install previews</span>
+
+<span class="fn">supabase/</span>
+└── <span class="fn">migrations/</span>
+    ├── <span class="type">001_init_schema.sql</span>
+    ├── <span class="type">002_rls_policies.sql</span>
+    ├── <span class="type">003_storage_buckets.sql</span>
+    └── <span class="type">004_inbox_magic.sql</span>      <span class="cm">// 📨 user_inboxes + email_intakes + currency cols</span>
+
+<span class="fn">workers/</span>                              <span class="cm">// 📨 Cloudflare Workers</span>
+└── <span class="fn">inbox-magic/</span>
+    ├── <span class="type">wrangler.toml</span>              <span class="cm">// Worker config + email routes</span>
+    ├── <span class="fn">src/</span>
+    │   ├── <span class="type">index.ts</span>                 <span class="cm">// email handler entry</span>
+    │   ├── <span class="type">parse-mime.ts</span>            <span class="cm">// postal-mime wrapper</span>
+    │   └── <span class="type">forward.ts</span>               <span class="cm">// HMAC + POST to Vercel</span>
+    └── <span class="type">package.json</span></code></pre>
+
+    <h3>Key Component: ItemRow.tsx</h3>
+    <p>זה הרכיב הכי חשוב באפליקציה — הוא נראה 30+ פעמים על המסך והוא חייב להיות מהיר ונוח לאצבעות עבות. interface ראשי:</p>
+
+    <pre><code><span class="kw">interface</span> <span class="type">ItemRowProps</span> {
+  <span class="fn">item</span><span class="op">:</span> <span class="type">DeliveryItem</span><span class="op">;</span>
+  <span class="fn">onStatusChange</span><span class="op">:</span> (<span class="fn">id</span><span class="op">:</span> <span class="type">string</span>, <span class="fn">status</span><span class="op">:</span> <span class="type">ItemStatus</span>) <span class="op">=&gt;</span> <span class="type">void</span><span class="op">;</span>
+  <span class="fn">onQtyChange</span><span class="op">:</span> (<span class="fn">id</span><span class="op">:</span> <span class="type">string</span>, <span class="fn">qty</span><span class="op">:</span> <span class="type">number</span>) <span class="op">=&gt;</span> <span class="type">void</span><span class="op">;</span>
+  <span class="fn">onPhotoAdd</span><span class="op">:</span> (<span class="fn">id</span><span class="op">:</span> <span class="type">string</span>, <span class="fn">file</span><span class="op">:</span> <span class="type">File</span>) <span class="op">=&gt;</span> <span class="type">void</span><span class="op">;</span>
+  <span class="fn">onNoteEdit</span><span class="op">:</span> (<span class="fn">id</span><span class="op">:</span> <span class="type">string</span>, <span class="fn">note</span><span class="op">:</span> <span class="type">string</span>) <span class="op">=&gt;</span> <span class="type">void</span><span class="op">;</span>
+}
+
+<span class="cm">// UX requirements:</span>
+<span class="cm">// - Tap area לפחות 44×44 pixels (iOS guideline)</span>
+<span class="cm">// - Long-press על checkbox פותח menu עם 5 statuses</span>
+<span class="cm">// - אם status = damaged → אוטומטית מציע לצלם תמונה</span>
+<span class="cm">// - Optimistic UI — סימון מיידי לפני שמירה ב-DB</span>
+<span class="cm">// - Haptic feedback (navigator.vibrate) על כל סימון</span></code></pre>
+  </section>
+
+  <!-- 13. Tech Summary -->
+  <section id="tech-summary">
+    <div class="section-header">
+      <div class="section-num">13</div>
+      <h2 class="section-title">סיכום טכנולוגיות</h2>
+    </div>
+    <table>
+      <thead>
+        <tr><th>שכבה</th><th>טכנולוגיה</th><th>תפקיד</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Frontend Framework</td><td>Next.js 15 (App Router)</td><td>SSR, Server Components, API Routes</td></tr>
+        <tr><td>Language</td><td>TypeScript (strict)</td><td>Type safety end-to-end</td></tr>
+        <tr><td>UI Library</td><td>React 19</td><td>Component model</td></tr>
+        <tr><td>Styling</td><td>Tailwind CSS v4</td><td>Utility-first, RTL plugin</td></tr>
+        <tr><td>Components</td><td>shadcn/ui</td><td>Accessible primitives</td></tr>
+        <tr><td>Forms</td><td>react-hook-form + zod</td><td>Validation + type-safe schemas</td></tr>
+        <tr><td>Client State</td><td>Zustand</td><td>Local UI state, current delivery</td></tr>
+        <tr><td>Server State</td><td>TanStack Query</td><td>Caching, optimistic updates</td></tr>
+        <tr><td>Database</td><td>Supabase Postgres</td><td>Persistent data + RLS</td></tr>
+        <tr><td>Auth</td><td>Supabase Auth</td><td>Anonymous + Google OAuth</td></tr>
+        <tr><td>Storage</td><td>Supabase Storage</td><td>Receipt images, damage photos</td></tr>
+        <tr><td>OCR / AI</td><td>Google Gemini 2.5 Flash + Pro</td><td>Vision-to-JSON (photos) + HTML-to-JSON (emails)</td></tr>
+        <tr style="background: rgba(56,196,242,0.04);"><td>📨 Email Ingestion</td><td>Cloudflare Email Routing</td><td>קליטת מיילים בכתובת inbox.doublecheck.app</td></tr>
+        <tr style="background: rgba(56,196,242,0.04);"><td>📨 Email Worker</td><td>Cloudflare Workers + postal-mime</td><td>Parse MIME + HMAC sign + forward webhook</td></tr>
+        <tr style="background: rgba(56,196,242,0.04);"><td>📨 FX Rates</td><td>exchangerate.host</td><td>שערי המרה היסטוריים (USD/EUR → ILS)</td></tr>
+        <tr style="background: rgba(56,196,242,0.04);"><td>📨 Push Notifications</td><td>Web Push (VAPID)</td><td>"📨 הזמנה חדשה זוהתה" notifications</td></tr>
+        <tr><td>Excel Export</td><td>SheetJS (xlsx)</td><td>In-browser workbook generation</td></tr>
+        <tr><td>PWA</td><td>next-pwa + Workbox</td><td>Service Worker, manifest, offline</td></tr>
+        <tr><td>Image Processing</td><td>browser-image-compression, heic2any, pdf.js</td><td>Pre-OCR client-side processing</td></tr>
+        <tr><td>Icons</td><td>lucide-react</td><td>Consistent icon set</td></tr>
+        <tr><td>Fonts</td><td>Heebo (Hebrew), Fredoka (Latin)</td><td>Google Fonts</td></tr>
+        <tr><td>Hosting</td><td>Vercel</td><td>Edge runtime, automatic deploys</td></tr>
+        <tr><td>Monitoring</td><td>Sentry</td><td>Error tracking (Phase 3)</td></tr>
+        <tr><td>Analytics</td><td>Vercel Analytics</td><td>Privacy-friendly metrics</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box tip">
+      <span class="info-box-label">Next Steps</span>
+      <span>אחרי אישור האיפיון: שלב הבא הוא עיצוב 12 המסכים (9 בסיסיים + 3 ל-Inbox Magic) — 1 קובץ HTML לכל מסך — על בסיס design system שייקבע (palette, typography, components). אחרי אישור עיצוב — תחילת בנייה לפי מפת הדרכים, שלב 1 (Photo MVP) ואז שלב 2 (Inbox Magic).</span>
+    </div>
+  </section>
+
+</div>
+
+<!-- ═══ SCROLL SPY ═══ -->
+<script>
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.sidebar-nav a');
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(link => link.classList.remove('active'));
+      const active = document.querySelector(`.sidebar-nav a[href="#${entry.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
