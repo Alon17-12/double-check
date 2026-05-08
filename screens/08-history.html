@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Double Check — היסטוריית משלוחים</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1e3a8a; --navy-light: #3b5cb8;
+  --cyan: #38C4F2; --coral: #F05680; --orange: #fb923c; --green: #22c55e; --yellow: #fbbf24;
+  --bg: #f4f6fb; --surface: #fff;
+  --border: rgba(30,58,138,0.08);
+  --text-main: #1e293b; --text-sub: #64748b; --text-muted: #94a3b8;
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.06);
+  --shadow-md: 0 4px 14px rgba(15,23,42,0.08);
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 22px;
+  --font-he: 'Heebo', sans-serif;
+  --font-en: 'Fredoka', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: var(--font-he);
+  background: var(--bg);
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--bg);
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+
+/* HEADER */
+.header {
+  background: var(--surface);
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 10;
+}
+.header-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 12px;
+}
+.back-btn {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--bg);
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--navy);
+}
+.header-title {
+  flex: 1;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.icon-btn {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--bg);
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--navy);
+}
+
+/* SEARCH */
+.search-row {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg);
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+}
+.search-row input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text-main);
+  outline: none;
+}
+.search-row input::placeholder { color: var(--text-muted); }
+
+/* STATS BAR */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 12px 16px;
+  background: var(--surface);
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.stat-mini {
+  text-align: center;
+  padding: 8px 4px;
+}
+.stat-mini-value {
+  font-family: var(--font-en);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.stat-mini-value.coral { color: var(--coral); }
+.stat-mini-value.green { color: var(--green); }
+.stat-mini-label {
+  font-size: 10px;
+  color: var(--text-sub);
+  margin-top: 2px;
+}
+
+/* FILTER PILLS */
+.filters {
+  display: flex; gap: 6px;
+  padding: 0 16px 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.filters::-webkit-scrollbar { display: none; }
+.pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-sub);
+  padding: 7px 12px;
+  border-radius: 100px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: 4px;
+}
+.pill.active {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+.pill .badge {
+  background: rgba(0,0,0,0.1);
+  border-radius: 100px;
+  padding: 1px 7px;
+  font-size: 10px;
+  font-family: var(--font-en);
+}
+.pill.active .badge { background: rgba(255,255,255,0.2); }
+
+/* MONTH HEADER */
+.month-header {
+  padding: 8px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* DELIVERY CARD */
+.deliveries { padding: 0 12px; }
+.delivery {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px;
+  margin-bottom: 8px;
+  display: flex; gap: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+.delivery:hover {
+  border-color: var(--cyan);
+  box-shadow: var(--shadow-sm);
+}
+.delivery.has-issue::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 3px;
+  background: var(--coral);
+}
+.delivery.refunded::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 3px;
+  background: var(--green);
+}
+
+.delivery-logo {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-en);
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+  flex-shrink: 0;
+}
+.logo-rl { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.logo-amazon { background: linear-gradient(135deg, #ff9900, #cc7700); }
+.logo-shufersal { background: linear-gradient(135deg, var(--green), #16a34a); }
+.logo-aliexpress { background: linear-gradient(135deg, #FF4747, #c70000); }
+.logo-yochananof { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+.logo-iherb { background: linear-gradient(135deg, #16a34a, #166534); }
+.logo-shein { background: linear-gradient(135deg, #1e293b, #000); }
+
+.delivery-info {
+  flex: 1;
+  min-width: 0;
+}
+.delivery-row1 {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 4px;
+}
+.delivery-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.delivery-source {
+  font-size: 9px;
+  font-weight: 700;
+  background: rgba(56,196,242,0.15);
+  color: var(--cyan);
+  padding: 2px 6px;
+  border-radius: 100px;
+  flex-shrink: 0;
+}
+.delivery-source.email { background: rgba(56,196,242,0.15); color: #0369a1; }
+.delivery-source.photo { background: rgba(100,116,139,0.15); color: var(--text-sub); }
+
+.delivery-meta {
+  font-size: 11px;
+  color: var(--text-sub);
+  display: flex; gap: 10px; align-items: center;
+  margin-bottom: 6px;
+}
+.delivery-meta span { display: flex; align-items: center; gap: 3px; }
+
+.delivery-bottom {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.delivery-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.status-completed { background: rgba(34,197,94,0.15); color: #15803d; }
+.status-issue { background: rgba(240,86,128,0.15); color: #be123c; }
+.status-refunded { background: rgba(56,196,242,0.15); color: #0369a1; }
+.status-pending { background: rgba(251,191,36,0.15); color: #b45309; }
+
+.delivery-amount {
+  font-family: var(--font-en);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+/* INSIGHT CARD */
+.insight {
+  margin: 12px 16px;
+  padding: 14px;
+  background: linear-gradient(135deg, rgba(56,196,242,0.06), rgba(30,58,138,0.04));
+  border: 1px solid rgba(56,196,242,0.2);
+  border-radius: var(--r-lg);
+  display: flex; gap: 12px;
+  align-items: flex-start;
+}
+.insight-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--cyan);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.insight-text { flex: 1; }
+.insight-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 2px;
+}
+.insight-desc {
+  font-size: 11px;
+  color: var(--text-sub);
+  line-height: 1.5;
+}
+
+@media (min-width: 481px) {
+  body { padding: 24px 0; background: #e2e8f0; }
+  .app { border-radius: 28px; overflow: hidden; box-shadow: var(--shadow-md); min-height: calc(100vh - 48px); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="header-row">
+      <button class="back-btn">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="header-title">היסטוריית משלוחים</div>
+      <button class="icon-btn">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+      </button>
+    </div>
+    <div class="search-row">
+      <svg width="18" height="18" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="חפש לפי חנות, מספר הזמנה...">
+    </div>
+  </header>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat-mini">
+      <div class="stat-mini-value">23</div>
+      <div class="stat-mini-label">סך משלוחים</div>
+    </div>
+    <div class="stat-mini">
+      <div class="stat-mini-value green">78%</div>
+      <div class="stat-mini-label">תקינים</div>
+    </div>
+    <div class="stat-mini">
+      <div class="stat-mini-value coral">5</div>
+      <div class="stat-mini-label">עם פערים</div>
+    </div>
+    <div class="stat-mini">
+      <div class="stat-mini-value">₪247</div>
+      <div class="stat-mini-label">סך החזרים</div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <button class="pill active">הכל <span class="badge">23</span></button>
+    <button class="pill">📨 ממייל <span class="badge">14</span></button>
+    <button class="pill">📷 צילום <span class="badge">9</span></button>
+    <button class="pill">חו״ל <span class="badge">7</span></button>
+    <button class="pill">פערים <span class="badge">5</span></button>
+  </div>
+
+  <!-- INSIGHT -->
+  <div class="insight">
+    <div class="insight-icon">
+      <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+    </div>
+    <div class="insight-text">
+      <div class="insight-title">📊 תובנה: רמי לוי הכי בעייתי</div>
+      <div class="insight-desc">3 מתוך 5 משלוחי רמי לוי השנה הגיעו עם פערים. שופרסל ב-0%.</div>
+    </div>
+  </div>
+
+  <!-- THIS WEEK -->
+  <div class="month-header">השבוע</div>
+  <div class="deliveries">
+    <div class="delivery has-issue">
+      <div class="delivery-logo logo-rl">RL</div>
+      <div class="delivery-info">
+        <div class="delivery-row1">
+          <div class="delivery-name">רמי לוי — #2019794</div>
+          <span class="delivery-source photo">📷 צילום</span>
+        </div>
+        <div class="delivery-meta">
+          <span>📅 היום</span>
+          <span>🛒 23 פריטים</span>
+        </div>
+        <div class="delivery-bottom">
+          <span class="delivery-status status-issue">5 פערים • ₪54.50 להחזר</span>
+          <span class="delivery-amount">₪373.77</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="delivery has-issue">
+      <div class="delivery-logo logo-amazon">AZ</div>
+      <div class="delivery-info">
+        <div class="delivery-row1">
+          <div class="delivery-name">Amazon US — #112-7834</div>
+          <span class="delivery-source email">📨 מייל</span>
+        </div>
+        <div class="delivery-meta">
+          <span>📅 אתמול</span>
+          <span>🛒 4 פריטים</span>
+          <span>🇺🇸 USD</span>
+        </div>
+        <div class="delivery-bottom">
+          <span class="delivery-status status-issue">3 פערים • $24.50</span>
+          <span class="delivery-amount">$87.50</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="delivery">
+      <div class="delivery-logo logo-shufersal">SH</div>
+      <div class="delivery-info">
+        <div class="delivery-row1">
+          <div class="delivery-name">שופרסל אונליין — #88142</div>
+          <span class="delivery-source photo">📷 צילום</span>
+        </div>
+        <div class="delivery-meta">
+          <span>📅 05/05</span>
+          <span>🛒 31 פריטים</span>
+        </div>
+        <div class="delivery-bottom">
+          <span class="delivery-status status-completed">תקין</span>
+          <span class="delivery-amount">₪412.30</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LAST WEEK -->
+  <div class="month-header">שבוע שעבר</div>
+  <div class="deliveries">
+    <div class="delivery refunded">
+      <div class="delivery-logo logo-aliexpress">AE</div>
+      <div class="delivery-info">
+        <div class="delivery-row1">
+          <div class="delivery-name">AliExpress — אוזניות+כיסוי</div>
+          <span class="delivery-source email">📨 מייל</span>
+        </div>
+        <div class="delivery-meta">
+          <span>📅 03/05</span>
+          <span>🛒 2 פריטים</span>
+          <span>🇨🇳 USD</span>
+        </div>
+        <div class="delivery-bottom">
+          <span class="delivery-status status-refunded">✓ החזר $12 התקבל</span>
+          <span class="delivery-amount">$24.99</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="delivery">
+      <div class="delivery-logo logo-yochananof">YO</div>
+      <div class="delivery-info">
+        <div class="delivery-row1">
+          <div class="delivery-name">יוחננוף — הזמנה #5471</div>
+          <span class="delivery-source photo">📷 צילום</span>
+        </div>
+        <div class="delivery-meta">
+          <span>📅 02/05</span>
+          <span>🛒 18 פריטים</span>
+        </div>
+        <div class="delivery-bottom">
+          <span class="delivery-status status-completed">תקין</span>
+          <span class="delivery-amount">₪289.40</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="delivery refunded">
+      <div class="delivery-logo logo-iherb">iH</div>
+      <div class="delivery-info">
+        <div class="delivery-row1">
+          <div class="delivery-name">iHerb — Vitamins Bundle</div>
+          <span class="delivery-source email">📨 מייל</span>
+        </div>
+        <div class="delivery-meta">
+          <span>📅 30/04</span>
+          <span>🛒 6 פריטים</span>
+          <span>🇺🇸 USD</span>
+        </div>
+        <div class="delivery-bottom">
+          <span class="delivery-status status-refunded">✓ זיכוי $8 התקבל</span>
+          <span class="delivery-amount">$64.30</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LAST MONTH -->
+  <div class="month-header">אפריל 2026</div>
+  <div class="deliveries">
+    <div class="delivery has-issue">
+      <div class="delivery-logo logo-shein">SH</div>
+      <div class="delivery-info">
+        <div class="delivery-row1">
+          <div class="delivery-name">SHEIN — קולקציית קיץ</div>
+          <span class="delivery-source email">📨 מייל</span>
+        </div>
+        <div class="delivery-meta">
+          <span>📅 28/04</span>
+          <span>🛒 12 פריטים</span>
+          <span>🇨🇳 USD</span>
+        </div>
+        <div class="delivery-bottom">
+          <span class="delivery-status status-pending">בהמתנה למענה</span>
+          <span class="delivery-amount">$78.20</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

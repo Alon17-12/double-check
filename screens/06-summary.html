@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Double Check — סיכום פערים</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1e3a8a; --navy-light: #3b5cb8;
+  --cyan: #38C4F2; --coral: #F05680; --orange: #fb923c; --green: #22c55e; --yellow: #fbbf24;
+  --bg: #f4f6fb; --surface: #fff;
+  --border: rgba(30,58,138,0.08);
+  --text-main: #1e293b; --text-sub: #64748b;
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.06);
+  --shadow-md: 0 4px 14px rgba(15,23,42,0.08);
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 22px;
+  --font-he: 'Heebo', sans-serif;
+  --font-en: 'Fredoka', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: var(--font-he);
+  background: var(--bg);
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--bg);
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+
+/* HERO */
+.hero {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 50%, var(--cyan) 100%);
+  padding: 24px 20px 60px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  top: -150px; left: -100px;
+}
+.hero-back {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  margin-bottom: 16px;
+  position: relative; z-index: 1;
+}
+.hero-icon {
+  width: 64px; height: 64px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px;
+  position: relative; z-index: 1;
+}
+.hero h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+  position: relative; z-index: 1;
+}
+.hero p {
+  font-size: 13px;
+  opacity: 0.85;
+  line-height: 1.6;
+  position: relative; z-index: 1;
+}
+
+/* KPI CARDS */
+.kpis {
+  margin: -40px 16px 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  position: relative; z-index: 2;
+}
+.kpi {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  padding: 14px 8px;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  border-top: 3px solid;
+}
+.kpi.green { border-color: var(--green); }
+.kpi.coral { border-color: var(--coral); }
+.kpi.yellow { border-color: var(--yellow); }
+.kpi-icon {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+.kpi-value {
+  font-family: var(--font-en);
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 1px;
+}
+.kpi.green .kpi-value { color: var(--green); }
+.kpi.coral .kpi-value { color: var(--coral); }
+.kpi.yellow .kpi-value { color: #b45309; }
+.kpi-label {
+  font-size: 10px;
+  color: var(--text-sub);
+  font-weight: 600;
+}
+
+/* REFUND ESTIMATE */
+.refund-card {
+  margin: 16px;
+  background: linear-gradient(135deg, rgba(240,86,128,0.08), rgba(240,86,128,0.02));
+  border: 1.5px solid rgba(240,86,128,0.25);
+  border-radius: var(--r-xl);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.refund-label {
+  font-size: 11px;
+  color: var(--coral);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.refund-amount {
+  font-family: var(--font-en);
+  font-size: 38px;
+  font-weight: 700;
+  color: var(--coral);
+  letter-spacing: -1px;
+  margin-bottom: 6px;
+}
+.refund-amount span {
+  font-size: 18px;
+  opacity: 0.7;
+}
+.refund-detail {
+  font-size: 12px;
+  color: var(--text-sub);
+  line-height: 1.6;
+}
+
+/* DISCREPANCY GROUPS */
+.disc-section {
+  padding: 0 16px;
+}
+.section-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 0 8px;
+}
+.section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.disc-group {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.disc-header {
+  padding: 12px 14px;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.disc-icon {
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.disc-icon.coral { background: rgba(240,86,128,0.12); }
+.disc-icon.orange { background: rgba(251,146,60,0.12); }
+.disc-icon.yellow { background: rgba(251,191,36,0.15); }
+.disc-info { flex: 1; }
+.disc-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.disc-subtitle {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+.disc-amount {
+  font-family: var(--font-en);
+  font-size: 14px;
+  font-weight: 700;
+}
+.disc-amount.coral { color: var(--coral); }
+.disc-amount.orange { color: var(--orange); }
+.disc-amount.yellow { color: #b45309; }
+
+.disc-items { padding: 4px 0; }
+.disc-item {
+  padding: 10px 14px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.disc-item:last-child { border-bottom: none; }
+.disc-item-name { font-weight: 500; flex: 1; }
+.disc-item-qty {
+  color: var(--text-sub);
+  font-size: 11px;
+  margin-right: 8px;
+}
+.disc-item-price {
+  font-family: var(--font-en);
+  font-weight: 700;
+}
+
+/* QUICK ACTIONS */
+.quick-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 16px;
+}
+.quick-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.quick-card:hover {
+  border-color: var(--cyan);
+  box-shadow: var(--shadow-sm);
+}
+.quick-icon {
+  font-size: 24px;
+  margin-bottom: 6px;
+}
+.quick-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 2px;
+}
+.quick-desc {
+  font-size: 10px;
+  color: var(--text-sub);
+}
+
+/* ACTION BAR */
+.action-bar {
+  position: fixed;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface);
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border);
+}
+.btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, var(--coral) 0%, #d63384 100%);
+  color: #fff;
+  border: none;
+  padding: 16px;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 8px 20px rgba(240,86,128,0.35);
+}
+
+@media (min-width: 481px) {
+  body { padding: 24px 0; background: #e2e8f0; }
+  .app { border-radius: 28px; overflow: hidden; box-shadow: var(--shadow-md); min-height: calc(100vh - 48px); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- HERO -->
+  <div class="hero">
+    <button class="hero-back">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="hero-icon">
+      <svg width="32" height="32" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    </div>
+    <h1>הבדיקה הסתיימה</h1>
+    <p>מצאנו 5 פערים במשלוח של רמי לוי</p>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis">
+    <div class="kpi green">
+      <div class="kpi-icon">✅</div>
+      <div class="kpi-value">18</div>
+      <div class="kpi-label">תקינים</div>
+    </div>
+    <div class="kpi coral">
+      <div class="kpi-icon">❌</div>
+      <div class="kpi-value">3</div>
+      <div class="kpi-label">חסרים</div>
+    </div>
+    <div class="kpi yellow">
+      <div class="kpi-icon">⚠️</div>
+      <div class="kpi-value">2</div>
+      <div class="kpi-label">חלקי/פגום</div>
+    </div>
+  </div>
+
+  <!-- REFUND -->
+  <div class="refund-card">
+    <div class="refund-label">סך החזר מבוקש</div>
+    <div class="refund-amount">₪54.50<span> / ₪373.77</span></div>
+    <div class="refund-detail">
+      14.6% מסך ההזמנה<br>
+      <strong style="color: var(--coral);">חסכון של 54 ₪ אם תשלח את הדוח עכשיו</strong>
+    </div>
+  </div>
+
+  <!-- DISCREPANCIES -->
+  <div class="disc-section">
+    <div class="section-header">
+      <div class="section-title">פירוט הפערים</div>
+    </div>
+
+    <!-- MISSING GROUP -->
+    <div class="disc-group">
+      <div class="disc-header">
+        <div class="disc-icon coral">❌</div>
+        <div class="disc-info">
+          <div class="disc-title">פריטים חסרים לחלוטין</div>
+          <div class="disc-subtitle">3 פריטים</div>
+        </div>
+        <div class="disc-amount coral">₪32.30</div>
+      </div>
+      <div class="disc-items">
+        <div class="disc-item">
+          <span class="disc-item-name">סלט מטבוחה אחלה 500 גרם</span>
+          <span class="disc-item-qty">1 יח׳</span>
+          <span class="disc-item-price">₪14.90</span>
+        </div>
+        <div class="disc-item">
+          <span class="disc-item-name">פטריות שמג׳י חוות תקוע 150 גרם</span>
+          <span class="disc-item-qty">1 יח׳</span>
+          <span class="disc-item-price">₪7.40</span>
+        </div>
+        <div class="disc-item">
+          <span class="disc-item-name">שרי קלמרס</span>
+          <span class="disc-item-qty">1 יח׳</span>
+          <span class="disc-item-price">₪10.00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PARTIAL GROUP -->
+    <div class="disc-group">
+      <div class="disc-header">
+        <div class="disc-icon orange">⚠️</div>
+        <div class="disc-info">
+          <div class="disc-title">חלקי / חוסר בכמות</div>
+          <div class="disc-subtitle">1 פריט</div>
+        </div>
+        <div class="disc-amount orange">₪7.20</div>
+      </div>
+      <div class="disc-items">
+        <div class="disc-item">
+          <span class="disc-item-name">פרניר רוטב עגבניות 100 גר</span>
+          <span class="disc-item-qty">5 מתוך 8 יח׳</span>
+          <span class="disc-item-price">₪7.20</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAMAGED -->
+    <div class="disc-group">
+      <div class="disc-header">
+        <div class="disc-icon yellow">💔</div>
+        <div class="disc-info">
+          <div class="disc-title">פגום / פג תוקף</div>
+          <div class="disc-subtitle">1 פריט • עם תמונה</div>
+        </div>
+        <div class="disc-amount yellow">₪15.00</div>
+      </div>
+      <div class="disc-items">
+        <div class="disc-item">
+          <span class="disc-item-name">עד חצות חלב 200 גרם 📸</span>
+          <span class="disc-item-qty">1 יח׳ פג תוקף</span>
+          <span class="disc-item-price">₪15.00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="section-header" style="padding: 0 16px;">
+    <div class="section-title">פעולות נוספות</div>
+  </div>
+  <div class="quick-actions">
+    <div class="quick-card">
+      <div class="quick-icon">📊</div>
+      <div class="quick-name">ייצא Excel</div>
+      <div class="quick-desc">קובץ מוכן להעלאה</div>
+    </div>
+    <div class="quick-card">
+      <div class="quick-icon">💾</div>
+      <div class="quick-name">שמור ולא לשלוח</div>
+      <div class="quick-desc">המשלוח נשמר בהיסטוריה</div>
+    </div>
+  </div>
+
+  <!-- ACTION BAR -->
+  <div class="action-bar">
+    <button class="btn-primary">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M4 4h16c1 0 2 1 2 2v12c0 1-1 2-2 2H4c-1 0-2-1-2-2V6c0-1 1-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+      הכן מייל לשירות לקוחות
+    </button>
+  </div>
+</div>
+</body>
+</html>

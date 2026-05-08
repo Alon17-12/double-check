@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Double Check — סימון משלוח</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1e3a8a; --navy-light: #3b5cb8;
+  --cyan: #38C4F2; --coral: #F05680; --orange: #fb923c; --green: #22c55e; --yellow: #fbbf24;
+  --bg: #f4f6fb; --surface: #fff;
+  --border: rgba(30,58,138,0.08);
+  --text-main: #1e293b; --text-sub: #64748b; --text-muted: #94a3b8;
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.06);
+  --shadow-md: 0 4px 14px rgba(15,23,42,0.08);
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px;
+  --font-he: 'Heebo', sans-serif;
+  --font-en: 'Fredoka', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: var(--font-he);
+  background: var(--bg);
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--bg);
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+
+/* HEADER (compact, sticky) */
+.header {
+  background: var(--surface);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 10;
+}
+.header-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 12px;
+}
+.back-btn {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--bg);
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--navy);
+}
+.header-info { flex: 1; }
+.header-info h1 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.header-info p {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
+/* PROGRESS */
+.progress-wrap {
+  display: flex; align-items: center; gap: 10px;
+}
+.progress-text {
+  font-family: var(--font-en);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  min-width: 56px;
+}
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--bg);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  width: 52%;
+  background: linear-gradient(90deg, var(--green), #16a34a);
+  border-radius: 100px;
+  transition: width 0.4s ease;
+}
+.progress-stats {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--text-sub);
+}
+.progress-stats span { display: flex; align-items: center; gap: 4px; }
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+.dot.green { background: var(--green); }
+.dot.coral { background: var(--coral); }
+.dot.orange { background: var(--orange); }
+.dot.gray { background: var(--text-muted); }
+
+/* FILTER PILLS */
+.filters {
+  display: flex; gap: 6px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.filters::-webkit-scrollbar { display: none; }
+.pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-sub);
+  padding: 7px 14px;
+  border-radius: 100px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.pill.active {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+.pill .count {
+  font-family: var(--font-en);
+  font-size: 11px;
+  margin-right: 4px;
+  opacity: 0.7;
+}
+
+/* ITEMS LIST */
+.items {
+  padding: 0 12px;
+}
+.item-row {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 12px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.item-row.checked-ok {
+  background: rgba(34,197,94,0.05);
+  border-color: rgba(34,197,94,0.25);
+}
+.item-row.checked-partial {
+  background: rgba(251,146,60,0.05);
+  border-color: rgba(251,146,60,0.25);
+}
+.item-row.checked-missing {
+  background: rgba(240,86,128,0.05);
+  border-color: rgba(240,86,128,0.25);
+}
+.item-row.checked-damaged {
+  background: rgba(245,158,11,0.05);
+  border-color: rgba(245,158,11,0.3);
+}
+
+/* CHECKBOX */
+.checkbox {
+  width: 30px; height: 30px;
+  border: 2px solid var(--border);
+  border-radius: 9px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  background: var(--surface);
+}
+.checkbox.checked-ok { background: var(--green); border-color: var(--green); }
+.checkbox.checked-partial { background: var(--orange); border-color: var(--orange); }
+.checkbox.checked-missing { background: var(--coral); border-color: var(--coral); }
+.checkbox.checked-damaged { background: var(--yellow); border-color: var(--yellow); }
+.checkbox svg { display: none; color: #fff; }
+.checkbox.checked-ok svg.ok,
+.checkbox.checked-partial svg.partial,
+.checkbox.checked-missing svg.missing,
+.checkbox.checked-damaged svg.damaged { display: block; }
+
+/* ITEM CONTENT */
+.item-info { flex: 1; min-width: 0; }
+.item-name {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.item-meta {
+  font-size: 11px;
+  color: var(--text-sub);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.item-meta strong {
+  font-family: var(--font-en);
+  color: var(--navy);
+  font-weight: 700;
+}
+.item-row.checked-ok .item-name {
+  text-decoration: line-through;
+  text-decoration-color: rgba(34,197,94,0.5);
+  text-decoration-thickness: 2px;
+  color: var(--text-sub);
+}
+.item-row.checked-missing .item-name { color: var(--coral); font-weight: 600; }
+
+/* QTY BADGE (when partial) */
+.qty-badge {
+  background: var(--orange);
+  color: #fff;
+  font-family: var(--font-en);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 100px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* QUICK STATUS BUTTONS */
+.quick-status {
+  display: flex; gap: 4px;
+  flex-shrink: 0;
+}
+.status-btn {
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  background: var(--bg);
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+.status-btn:hover { transform: scale(1.05); }
+.status-btn.active.ok { background: var(--green); }
+.status-btn.active.partial { background: var(--orange); }
+.status-btn.active.missing { background: var(--coral); }
+.status-btn.active.damaged { background: var(--yellow); }
+
+/* ACTION BAR */
+.action-bar {
+  position: fixed;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface);
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+}
+.btn-primary {
+  flex: 1;
+  background: linear-gradient(135deg, var(--navy), var(--navy-light));
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 8px 20px rgba(30,58,138,0.25);
+}
+.btn-success {
+  flex: 1;
+  background: linear-gradient(135deg, var(--green), #16a34a);
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 8px 20px rgba(34,197,94,0.25);
+}
+
+/* PHOTO HINT */
+.photo-hint {
+  position: absolute;
+  bottom: 4px; right: 4px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--yellow);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  border: 2px solid #fff;
+}
+
+@media (min-width: 481px) {
+  body { padding: 24px 0; background: #e2e8f0; }
+  .app { border-radius: 28px; overflow: hidden; box-shadow: var(--shadow-md); min-height: calc(100vh - 48px); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-row">
+      <button class="back-btn">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="header-info">
+        <h1>רמי לוי — הזמנה #2019794</h1>
+        <p>סמן כל פריט שהגיע. נשמר אוטומטית.</p>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-text">12/23</div>
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+    </div>
+    <div class="progress-stats" style="margin-top: 8px;">
+      <span><span class="dot green"></span> 9 תקין</span>
+      <span><span class="dot orange"></span> 1 חלקי</span>
+      <span><span class="dot coral"></span> 2 חסר</span>
+      <span><span class="dot gray"></span> 11 לא נבדק</span>
+    </div>
+  </header>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <button class="pill active">הכל <span class="count">23</span></button>
+    <button class="pill">לא נבדקו <span class="count">11</span></button>
+    <button class="pill">בעיות <span class="count">3</span></button>
+    <button class="pill">תקינים <span class="count">9</span></button>
+  </div>
+
+  <!-- ITEMS -->
+  <div class="items">
+    <!-- OK -->
+    <div class="item-row checked-ok">
+      <div class="checkbox checked-ok">
+        <svg class="ok" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="item-info">
+        <div class="item-name">עגבניה</div>
+        <div class="item-meta"><strong>1.04 ק״ג</strong> • ₪6.11</div>
+      </div>
+    </div>
+
+    <div class="item-row checked-ok">
+      <div class="checkbox checked-ok">
+        <svg class="ok" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="item-info">
+        <div class="item-name">מלפפון</div>
+        <div class="item-meta"><strong>0.96 ק״ג</strong> • ₪5.68</div>
+      </div>
+    </div>
+
+    <!-- MISSING -->
+    <div class="item-row checked-missing">
+      <div class="checkbox checked-missing">
+        <svg class="missing" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+      <div class="item-info">
+        <div class="item-name">סלט מטבוחה אחלה 500 גרם</div>
+        <div class="item-meta">חסר • <span style="color: var(--coral); font-weight: 600;">₪14.90 להחזר</span></div>
+      </div>
+      <div class="quick-status">
+        <button class="status-btn">✅</button>
+        <button class="status-btn">⚠️</button>
+        <button class="status-btn active missing">❌</button>
+        <button class="status-btn">💔</button>
+      </div>
+    </div>
+
+    <!-- PARTIAL -->
+    <div class="item-row checked-partial">
+      <div class="checkbox checked-partial">
+        <svg class="partial" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <div class="item-info">
+        <div class="item-name">פרניר רוטב עגבניות 100ג</div>
+        <div class="item-meta">הוזמן 8, הגיע <strong style="color: var(--orange);">5</strong> • חוסר ₪7.20</div>
+      </div>
+      <div class="qty-badge">5/8</div>
+    </div>
+
+    <div class="item-row checked-ok">
+      <div class="checkbox checked-ok">
+        <svg class="ok" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="item-info">
+        <div class="item-name">פלפל אדום</div>
+        <div class="item-meta"><strong>1.04 ק״ג</strong> • ₪9.29</div>
+      </div>
+    </div>
+
+    <!-- DAMAGED with photo -->
+    <div class="item-row checked-damaged">
+      <div class="checkbox checked-damaged">
+        <svg class="damaged" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div class="item-info">
+        <div class="item-name">עד חצות חלב 200 גרם</div>
+        <div class="item-meta" style="color: var(--coral);">פג תוקף • ₪15.00 להחזר</div>
+      </div>
+      <div class="photo-hint">📸</div>
+    </div>
+
+    <!-- UNCHECKED -->
+    <div class="item-row">
+      <div class="checkbox" style="border-color: var(--text-muted);"></div>
+      <div class="item-info">
+        <div class="item-name">פטריות שמג׳י חוות תקוע 150ג</div>
+        <div class="item-meta"><strong>1 יח׳</strong> • ₪7.40</div>
+      </div>
+    </div>
+
+    <div class="item-row">
+      <div class="checkbox" style="border-color: var(--text-muted);"></div>
+      <div class="item-info">
+        <div class="item-name">ביצים L 18 יחידות</div>
+        <div class="item-meta"><strong>1 יח׳</strong> • ₪21.20</div>
+      </div>
+    </div>
+
+    <div class="item-row">
+      <div class="checkbox" style="border-color: var(--text-muted);"></div>
+      <div class="item-info">
+        <div class="item-name">שרי קלמרס</div>
+        <div class="item-meta"><strong>1 יח׳</strong> • ₪10.00</div>
+      </div>
+    </div>
+
+    <div class="item-row">
+      <div class="checkbox" style="border-color: var(--text-muted);"></div>
+      <div class="item-info">
+        <div class="item-name">שישיית מי סודה רמי לוי 250מל</div>
+        <div class="item-meta"><strong>1 יח׳</strong> • ₪10.90</div>
+      </div>
+    </div>
+
+    <div class="item-row">
+      <div class="checkbox" style="border-color: var(--text-muted);"></div>
+      <div class="item-info">
+        <div class="item-name">משקה יטבתה פרו קפה ללא סוכר 350מל</div>
+        <div class="item-meta"><strong>5 יח׳</strong> • ₪36.50</div>
+      </div>
+    </div>
+
+    <div style="text-align: center; padding: 12px; color: var(--text-sub); font-size: 11px;">+11 פריטים נוספים בהמתנה</div>
+  </div>
+
+  <!-- ACTION BAR -->
+  <div class="action-bar">
+    <button class="btn-success">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      סיים בדיקה (12/23)
+    </button>
+  </div>
+</div>
+</body>
+</html>

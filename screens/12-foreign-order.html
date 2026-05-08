@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Double Check — הזמנה מחו״ל</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1e3a8a; --navy-light: #3b5cb8;
+  --cyan: #38C4F2; --coral: #F05680; --orange: #fb923c; --green: #22c55e; --yellow: #fbbf24;
+  --bg: #f4f6fb; --surface: #fff;
+  --border: rgba(30,58,138,0.08);
+  --text-main: #1e293b; --text-sub: #64748b; --text-muted: #94a3b8;
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.06);
+  --shadow-md: 0 4px 14px rgba(15,23,42,0.08);
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 22px;
+  --font-he: 'Heebo', sans-serif;
+  --font-en: 'Fredoka', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: var(--font-he);
+  background: var(--bg);
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--bg);
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+
+/* HEADER (Amazon-styled) */
+.header {
+  background: linear-gradient(135deg, #ff9900 0%, #cc7700 100%);
+  padding: 14px 16px 24px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '🌎';
+  position: absolute;
+  font-size: 200px;
+  bottom: -90px; right: -30px;
+  opacity: 0.08;
+}
+.header-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 14px;
+}
+.back-btn {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: #fff;
+}
+.header-title-text {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+.icon-btn {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.order-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  position: relative; z-index: 1;
+}
+.order-meta {
+  font-size: 12px;
+  opacity: 0.85;
+  display: flex; align-items: center; gap: 10px;
+  position: relative; z-index: 1;
+}
+.source-badge {
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 3px 8px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* CURRENCY CARD */
+.currency-card {
+  margin: -14px 16px 0;
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  padding: 20px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+.amount-row {
+  display: flex; align-items: baseline; justify-content: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.original-amount {
+  font-family: var(--font-en);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -1px;
+}
+.original-currency {
+  font-family: var(--font-en);
+  font-size: 16px;
+  color: var(--text-sub);
+  font-weight: 600;
+}
+.equals { color: var(--text-muted); font-size: 18px; }
+.ils-amount {
+  font-family: var(--font-en);
+  font-size: 20px;
+  color: var(--text-sub);
+  font-weight: 600;
+}
+.exchange-info {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-bottom: 12px;
+}
+.exchange-info strong { color: var(--navy); font-family: var(--font-en); }
+
+.tax-row {
+  display: flex;
+  margin-top: 12px;
+  background: var(--bg);
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  font-size: 11px;
+}
+.tax-cell {
+  flex: 1;
+  text-align: center;
+  border-left: 1px solid var(--border);
+}
+.tax-cell:first-child { border-left: none; }
+.tax-label {
+  color: var(--text-sub);
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+.tax-value {
+  font-family: var(--font-en);
+  font-weight: 700;
+  color: var(--navy);
+  font-size: 14px;
+}
+.tax-cell.exempt .tax-value { color: var(--green); }
+
+/* TRACKING CARD */
+.tracking-card {
+  margin: 12px 16px;
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.tracking-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.tracking-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  display: flex; align-items: center; gap: 6px;
+}
+.eta-badge {
+  background: rgba(56,196,242,0.12);
+  color: var(--cyan);
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.timeline {
+  padding: 16px 16px 12px;
+  position: relative;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  right: 30px; top: 24px; bottom: 24px;
+  width: 2px;
+  background: var(--border);
+}
+.tl-step {
+  display: flex; gap: 14px;
+  position: relative;
+  padding-bottom: 14px;
+}
+.tl-step:last-child { padding-bottom: 0; }
+.tl-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  z-index: 1;
+}
+.tl-step.done .tl-dot { background: var(--green); border-color: var(--green); }
+.tl-step.active .tl-dot {
+  background: var(--cyan);
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 4px rgba(56,196,242,0.2);
+  animation: pulseRing 1.8s ease-in-out infinite;
+}
+@keyframes pulseRing {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(56,196,242,0.2); }
+  50% { box-shadow: 0 0 0 8px rgba(56,196,242,0.1); }
+}
+.tl-content {
+  flex: 1;
+  min-width: 0;
+  padding-top: 4px;
+}
+.tl-name {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 1px;
+}
+.tl-step.done .tl-name { color: var(--green); }
+.tl-step.pending .tl-name { color: var(--text-muted); }
+.tl-time {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
+/* ITEMS */
+.section { margin: 12px 16px; }
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 10px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.section-title small {
+  font-size: 11px;
+  color: var(--text-sub);
+  font-weight: 500;
+}
+.items-list {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.item {
+  padding: 12px 14px;
+  display: flex; gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.item:last-child { border-bottom: none; }
+.item-img {
+  width: 50px; height: 50px;
+  border-radius: 10px;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.item-info { flex: 1; min-width: 0; }
+.item-name {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+.item-meta {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+.item-prices {
+  text-align: left;
+  white-space: nowrap;
+}
+.item-usd {
+  font-family: var(--font-en);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--navy);
+}
+.item-ils {
+  font-size: 10px;
+  color: var(--text-sub);
+  margin-top: 1px;
+}
+
+/* WARNING CARD */
+.warning {
+  margin: 12px 16px;
+  padding: 12px 14px;
+  background: rgba(251,191,36,0.08);
+  border: 1px solid rgba(251,191,36,0.3);
+  border-radius: var(--r-md);
+  display: flex; gap: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.warning strong { color: #b45309; }
+
+/* ACTION BAR */
+.action-bar {
+  position: fixed;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface);
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border);
+  display: flex; gap: 8px;
+}
+.btn-primary {
+  flex: 1;
+  background: linear-gradient(135deg, #ff9900, #cc7700);
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 8px 20px rgba(255,153,0,0.35);
+}
+.btn-secondary {
+  background: var(--bg);
+  color: var(--navy);
+  border: none;
+  padding: 14px 20px;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (min-width: 481px) {
+  body { padding: 24px 0; background: #e2e8f0; }
+  .app { border-radius: 28px; overflow: hidden; box-shadow: var(--shadow-md); min-height: calc(100vh - 48px); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="header-row">
+      <button class="back-btn">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <span class="header-title-text">📦 Amazon US — הזמנה</span>
+      <button class="icon-btn">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+      </button>
+    </div>
+    <div class="order-title">Order #112-7834561-2935452</div>
+    <div class="order-meta">
+      <span>📅 הוזמן 06/05/2026</span>
+      <span class="source-badge">📨 Inbox Magic</span>
+    </div>
+  </header>
+
+  <!-- CURRENCY -->
+  <div class="currency-card">
+    <div class="amount-row">
+      <span class="original-currency">$</span>
+      <span class="original-amount">87.50</span>
+      <span class="equals">≈</span>
+      <span class="ils-amount">₪316.75</span>
+    </div>
+    <div class="exchange-info">
+      שער המרה ב-06/05/2026: <strong>3.62</strong> ₪ ל-USD<br>
+      <small style="color: var(--text-muted);">נשמר אוטומטית מ-exchangerate.host</small>
+    </div>
+    <div class="tax-row">
+      <div class="tax-cell">
+        <div class="tax-label">מע״מ ששולם</div>
+        <div class="tax-value">₪53.85</div>
+      </div>
+      <div class="tax-cell exempt">
+        <div class="tax-label">מכס</div>
+        <div class="tax-value">₪0</div>
+      </div>
+      <div class="tax-cell">
+        <div class="tax-label">משלוח</div>
+        <div class="tax-value">חינם</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRACKING -->
+  <div class="tracking-card">
+    <div class="tracking-header">
+      <div class="tracking-title">
+        <span style="font-size: 16px;">🚚</span>
+        מעקב חבילה
+      </div>
+      <span class="eta-badge">📅 ETA 14/05</span>
+    </div>
+    <div class="timeline">
+      <div class="tl-step done">
+        <div class="tl-dot">
+          <svg width="12" height="12" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="tl-content">
+          <div class="tl-name">הזמנה התקבלה</div>
+          <div class="tl-time">06/05 14:32</div>
+        </div>
+      </div>
+      <div class="tl-step done">
+        <div class="tl-dot">
+          <svg width="12" height="12" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="tl-content">
+          <div class="tl-name">נשלח מהמחסן</div>
+          <div class="tl-time">06/05 22:14 • Phoenix, AZ</div>
+        </div>
+      </div>
+      <div class="tl-step active">
+        <div class="tl-dot">
+          <span style="color: white; font-size: 11px;">✈️</span>
+        </div>
+        <div class="tl-content">
+          <div class="tl-name">בטיסה ל-תל אביב</div>
+          <div class="tl-time">07/05 06:30 • Memphis Hub</div>
+        </div>
+      </div>
+      <div class="tl-step pending">
+        <div class="tl-dot">
+          <svg width="12" height="12" fill="none" stroke="var(--text-muted)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg>
+        </div>
+        <div class="tl-content">
+          <div class="tl-name">שחרור ממכס</div>
+          <div class="tl-time">צפוי 12/05</div>
+        </div>
+      </div>
+      <div class="tl-step pending">
+        <div class="tl-dot">
+          <svg width="12" height="12" fill="none" stroke="var(--text-muted)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg>
+        </div>
+        <div class="tl-content">
+          <div class="tl-name">משלוח אישי</div>
+          <div class="tl-time">צפוי 14/05</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ITEMS -->
+  <div class="section">
+    <div class="section-title">
+      <span>פריטי ההזמנה</span>
+      <small>4 פריטים</small>
+    </div>
+    <div class="items-list">
+      <div class="item">
+        <div class="item-img">🎧</div>
+        <div class="item-info">
+          <div class="item-name">Sony WH-1000XM5 Wireless Headphones</div>
+          <div class="item-meta">1 × $299.00 • Black</div>
+        </div>
+        <div class="item-prices">
+          <div class="item-usd">$299.00</div>
+          <div class="item-ils">₪1,082.38</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-img">🔌</div>
+        <div class="item-info">
+          <div class="item-name">Anker USB-C Hub 7-in-1</div>
+          <div class="item-meta">1 × $49.99</div>
+        </div>
+        <div class="item-prices">
+          <div class="item-usd">$49.99</div>
+          <div class="item-ils">₪180.96</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-img">📱</div>
+        <div class="item-info">
+          <div class="item-name">iPhone 16 Pro Silicone Case</div>
+          <div class="item-meta">2 × $19.50 • Navy Blue</div>
+        </div>
+        <div class="item-prices">
+          <div class="item-usd">$39.00</div>
+          <div class="item-ils">₪141.18</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-img">📦</div>
+        <div class="item-info">
+          <div class="item-name">Cable Management Box</div>
+          <div class="item-meta">1 × $15.49</div>
+        </div>
+        <div class="item-prices">
+          <div class="item-usd">$15.49</div>
+          <div class="item-ils">₪56.07</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WARNING -->
+  <div class="warning">
+    <span style="font-size: 18px;">💡</span>
+    <div>
+      <strong>טיפ לחו״ל:</strong> אם פריט יהיה חסר/פגום — דוח הפערים יציג את הסכום ב-USD <em>וגם</em> ב-₪ לפי שער היום של המשלוח. ככה אין ויכוחים על "השער הנכון".
+    </div>
+  </div>
+</div>
+
+<!-- ACTION BAR -->
+<div class="action-bar">
+  <button class="btn-secondary">📨 פתח מייל מקור</button>
+  <button class="btn-primary">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    סמן כשהמשלוח יגיע
+  </button>
+</div>
+</body>
+</html>

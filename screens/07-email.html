@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Double Check — מייל לשירות לקוחות</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1e3a8a; --navy-light: #3b5cb8;
+  --cyan: #38C4F2; --coral: #F05680; --orange: #fb923c; --green: #22c55e; --yellow: #fbbf24;
+  --bg: #f4f6fb; --surface: #fff;
+  --border: rgba(30,58,138,0.08);
+  --text-main: #1e293b; --text-sub: #64748b;
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.06);
+  --shadow-md: 0 4px 14px rgba(15,23,42,0.08);
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px;
+  --font-he: 'Heebo', sans-serif;
+  --font-en: 'Fredoka', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: var(--font-he);
+  background: var(--bg);
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--bg);
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+
+/* HEADER */
+.header {
+  background: var(--surface);
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+  position: sticky; top: 0; z-index: 10;
+}
+.back-btn {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--bg);
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--navy);
+}
+.header-title { flex: 1; }
+.header-title h1 { font-size: 16px; font-weight: 700; color: var(--navy); }
+.header-title p { font-size: 11px; color: var(--text-sub); }
+
+/* TONE TOGGLE */
+.tone-section {
+  padding: 16px;
+}
+.tone-label {
+  font-size: 11px;
+  color: var(--text-sub);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  padding-right: 4px;
+}
+.tone-toggle {
+  display: flex;
+  background: var(--surface);
+  border-radius: var(--r-md);
+  padding: 4px;
+  gap: 2px;
+  border: 1px solid var(--border);
+}
+.tone-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 9px 8px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.tone-btn.active {
+  background: var(--navy);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(30,58,138,0.2);
+}
+.tone-btn-icon { font-size: 16px; margin-bottom: 1px; }
+.tone-btn-label { font-size: 11px; font-weight: 700; }
+.tone-btn-sub { font-size: 9px; opacity: 0.7; font-weight: 500; }
+
+/* RECIPIENT */
+.recipient-card {
+  margin: 0 16px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+}
+.recipient-row {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px;
+}
+.recipient-row + .recipient-row { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+.recipient-label {
+  color: var(--text-sub);
+  font-weight: 600;
+  min-width: 36px;
+}
+.recipient-value {
+  flex: 1;
+  font-weight: 500;
+  color: var(--navy);
+}
+.copy-btn {
+  background: var(--bg);
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--cyan);
+  cursor: pointer;
+}
+
+/* EMAIL PREVIEW */
+.email-card {
+  margin: 0 16px 12px;
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.email-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(30,58,138,0.03), rgba(56,196,242,0.03));
+}
+.email-subject {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+.email-meta {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
+.email-body {
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.85;
+  color: var(--text-main);
+}
+.email-body p { margin-bottom: 10px; }
+.email-body strong { color: var(--navy); }
+.email-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  margin: 14px 0 6px;
+  display: flex; align-items: center; gap: 6px;
+}
+.email-section-title.coral { color: var(--coral); }
+.email-section-title.orange { color: #b45309; }
+.email-section-title.yellow { color: #b45309; }
+.email-body ul {
+  list-style: none;
+  padding-right: 0;
+  margin-bottom: 8px;
+}
+.email-body li {
+  padding: 3px 0;
+  font-size: 12px;
+  display: flex; align-items: flex-start; gap: 6px;
+}
+.email-body li::before {
+  content: '•';
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.refund-line {
+  background: rgba(240,86,128,0.08);
+  border: 1px solid rgba(240,86,128,0.2);
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  margin: 12px 0;
+  text-align: center;
+  font-weight: 700;
+  color: var(--coral);
+  font-size: 14px;
+}
+
+/* SHARE ACTIONS */
+.share-section {
+  padding: 0 16px 16px;
+}
+.share-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.share-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px 10px;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  transition: all 0.15s;
+}
+.share-btn:hover {
+  border-color: var(--cyan);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+.share-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  color: #fff;
+  margin-bottom: 2px;
+}
+.share-icon.copy { background: var(--cyan); }
+.share-icon.mail { background: linear-gradient(135deg, #ea4335, #d33b2c); }
+.share-icon.whatsapp { background: linear-gradient(135deg, #25D366, #128C7E); }
+.share-icon.excel { background: linear-gradient(135deg, #1d6f42, #0c5530); }
+.share-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.share-sub {
+  font-size: 10px;
+  color: var(--text-sub);
+}
+
+/* SEND BTN */
+.action-bar {
+  position: fixed;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface);
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border);
+  display: flex; gap: 8px;
+}
+.btn-edit {
+  background: var(--bg);
+  color: var(--navy);
+  border: none;
+  padding: 14px 20px;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-send {
+  flex: 1;
+  background: linear-gradient(135deg, var(--navy), var(--navy-light));
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 8px 20px rgba(30,58,138,0.25);
+}
+
+@media (min-width: 481px) {
+  body { padding: 24px 0; background: #e2e8f0; }
+  .app { border-radius: 28px; overflow: hidden; box-shadow: var(--shadow-md); min-height: calc(100vh - 48px); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <button class="back-btn">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="header-title">
+      <h1>מייל לשירות לקוחות</h1>
+      <p>מנוסח אוטומטית • ניתן לעריכה</p>
+    </div>
+  </header>
+
+  <!-- TONE -->
+  <div class="tone-section">
+    <div class="tone-label">סגנון פנייה</div>
+    <div class="tone-toggle">
+      <button class="tone-btn">
+        <span class="tone-btn-icon">😊</span>
+        <span class="tone-btn-label">חברי</span>
+        <span class="tone-btn-sub">גמיש</span>
+      </button>
+      <button class="tone-btn active">
+        <span class="tone-btn-icon">💼</span>
+        <span class="tone-btn-label">עסקי</span>
+        <span class="tone-btn-sub">מקצועי</span>
+      </button>
+      <button class="tone-btn">
+        <span class="tone-btn-icon">⚖️</span>
+        <span class="tone-btn-label">תקיף</span>
+        <span class="tone-btn-sub">משפטי</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- RECIPIENT -->
+  <div class="recipient-card">
+    <div class="recipient-row">
+      <span class="recipient-label">אל:</span>
+      <span class="recipient-value">service@rami-levy.co.il</span>
+      <button class="copy-btn">⚡ זוהה אוטומטית</button>
+    </div>
+    <div class="recipient-row">
+      <span class="recipient-label">CC:</span>
+      <span class="recipient-value" style="color: var(--text-muted);">הוסף עותק...</span>
+    </div>
+  </div>
+
+  <!-- EMAIL PREVIEW -->
+  <div class="email-card">
+    <div class="email-header">
+      <div class="email-subject">פערים בהזמנה #2019794 מתאריך 07/05/2026</div>
+      <div class="email-meta">משלוח מ-08/05/2026 • 5 פערים • החזר ₪54.50</div>
+    </div>
+    <div class="email-body">
+      <p>שלום,</p>
+      <p>קיבלתי היום את הזמנתי (מספר הזמנה: <strong>2019794</strong>, תאריך הזמנה: 07/05/2026). לאחר בדיקה מקיפה של המשלוח מול הקבלה, אני מבקש לדווח על הפערים הבאים:</p>
+
+      <div class="email-section-title coral">
+        <span>❌</span> פריטים חסרים לחלוטין (3):
+      </div>
+      <ul>
+        <li><strong>סלט מטבוחה אחלה 500 גרם</strong> — 1 יח׳ — ₪14.90</li>
+        <li><strong>פטריות שמג׳י חוות תקוע 150 גרם</strong> — 1 יח׳ — ₪7.40</li>
+        <li><strong>שרי קלמרס</strong> — 1 יח׳ — ₪10.00</li>
+      </ul>
+
+      <div class="email-section-title orange">
+        <span>⚠️</span> פריטים שהגיעו בכמות חלקית (1):
+      </div>
+      <ul>
+        <li><strong>פרניר רוטב עגבניות 100 גר</strong> — הוזמנו 8 יח׳, הגיעו 5 — חוסר ₪7.20</li>
+      </ul>
+
+      <div class="email-section-title yellow">
+        <span>💔</span> פריטים פגומים / פגי תוקף (1):
+      </div>
+      <ul>
+        <li><strong>עד חצות חלב 200 גרם</strong> — פג תוקף — ₪15.00 (תמונה מצורפת)</li>
+      </ul>
+
+      <div class="refund-line">סך החזר מבוקש: ₪54.50</div>
+
+      <p>אשמח לקבל החזר כספי / זיכוי / משלוח חוזר של הפריטים החסרים. מצורפת הקבלה המלאה לעיון. אני זמין לכל שאלה או הבהרה.</p>
+      <p>תודה,<br><strong>אלון גבאי</strong><br>050-XXX-XXXX</p>
+    </div>
+  </div>
+
+  <!-- SHARE -->
+  <div class="share-section">
+    <div class="tone-label" style="margin-top: 8px;">דרכי שיתוף</div>
+    <div class="share-grid">
+      <div class="share-btn">
+        <div class="share-icon copy">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        </div>
+        <div class="share-name">העתק טקסט</div>
+        <div class="share-sub">הכנס לאן שתרצה</div>
+      </div>
+      <div class="share-btn">
+        <div class="share-icon mail">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M4 4h16c1 0 2 1 2 2v12c0 1-1 2-2 2H4c-1 0-2-1-2-2V6c0-1 1-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+        </div>
+        <div class="share-name">פתח באפליקציית מייל</div>
+        <div class="share-sub">Gmail / Outlook / iOS Mail</div>
+      </div>
+      <div class="share-btn">
+        <div class="share-icon whatsapp">
+          <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zm-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884zm8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        </div>
+        <div class="share-name">שלח בוואטסאפ</div>
+        <div class="share-sub">הודעה ישירה</div>
+      </div>
+      <div class="share-btn">
+        <div class="share-icon excel">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13l2 2 4-4"/></svg>
+        </div>
+        <div class="share-name">צרף Excel</div>
+        <div class="share-sub">קובץ מסודר לדוא״ל</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTION BAR -->
+  <div class="action-bar">
+    <button class="btn-edit">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4z"/></svg>
+    </button>
+    <button class="btn-send">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      העתק ושלח
+    </button>
+  </div>
+</div>
+</body>
+</html>

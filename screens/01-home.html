@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Double Check — בית</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1e3a8a; --navy-light: #3b5cb8; --navy-dark: #172554;
+  --cyan: #38C4F2; --cyan-dark: #2da8d4;
+  --coral: #F05680; --orange: #fb923c; --green: #22c55e; --yellow: #fbbf24;
+  --bg: #f4f6fb; --surface: #ffffff;
+  --border: rgba(30,58,138,0.08);
+  --text-main: #1e293b; --text-sub: #64748b; --text-muted: #94a3b8;
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.06);
+  --shadow-md: 0 4px 14px rgba(15,23,42,0.08);
+  --shadow-lg: 0 12px 32px rgba(15,23,42,0.12);
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 22px;
+  --font-he: 'Heebo', sans-serif;
+  --font-en: 'Fredoka', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: var(--font-he);
+  background: var(--bg);
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--bg);
+  min-height: 100vh;
+  position: relative;
+  padding-bottom: 90px;
+}
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+  padding: 20px 20px 80px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.header::before, .header::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+}
+.header::before { width: 200px; height: 200px; top: -80px; left: -60px; }
+.header::after { width: 140px; height: 140px; bottom: -50px; right: -40px; }
+.header-top {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px; position: relative; z-index: 1;
+}
+.logo {
+  font-family: var(--font-en);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.logo span { color: var(--cyan); }
+.icon-btn {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: none;
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.icon-btn:hover { background: rgba(255,255,255,0.18); }
+.greeting {
+  position: relative; z-index: 1;
+}
+.greeting h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.greeting p { font-size: 13px; opacity: 0.85; }
+
+/* CONTENT */
+.content {
+  margin-top: -56px;
+  padding: 0 16px;
+  position: relative;
+  z-index: 2;
+}
+
+/* CTA CARD */
+.cta-card {
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  padding: 22px 20px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  margin-bottom: 24px;
+}
+.cta-icon {
+  width: 64px; height: 64px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+  margin: 0 auto 14px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 20px rgba(56,196,242,0.35);
+}
+.cta-card h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--navy);
+}
+.cta-card p {
+  font-size: 13px;
+  color: var(--text-sub);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+.cta-btn {
+  width: 100%;
+  background: linear-gradient(135deg, var(--navy), var(--navy-light));
+  color: #fff;
+  border: none;
+  padding: 15px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 8px 20px rgba(30,58,138,0.25);
+  transition: transform 0.15s;
+}
+.cta-btn:hover { transform: translateY(-1px); }
+.cta-btn:active { transform: translateY(0); }
+.cta-secondary {
+  width: 100%;
+  background: transparent;
+  color: var(--navy);
+  border: 1.5px dashed rgba(30,58,138,0.25);
+  padding: 12px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  margin-top: 8px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.cta-secondary:hover { background: rgba(30,58,138,0.04); }
+
+/* STATS */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.stat {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  padding: 12px 8px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+.stat-value {
+  font-family: var(--font-en);
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.stat.green .stat-value { color: var(--green); }
+.stat.coral .stat-value { color: var(--coral); }
+.stat.navy .stat-value { color: var(--navy); }
+.stat-label {
+  font-size: 11px;
+  color: var(--text-sub);
+  font-weight: 500;
+}
+
+/* SECTION */
+.section-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 4px 12px;
+}
+.section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.section-link {
+  font-size: 12px;
+  color: var(--cyan);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* DELIVERY CARD */
+.delivery-list { display: flex; flex-direction: column; gap: 10px; }
+.delivery {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  padding: 14px;
+  box-shadow: var(--shadow-sm);
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.delivery:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+.delivery-logo {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-en);
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  flex-shrink: 0;
+}
+.logo-rl { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.logo-amazon { background: linear-gradient(135deg, #ff9900, #cc7700); }
+.logo-shufersal { background: linear-gradient(135deg, var(--green), #16a34a); }
+.logo-aliexpress { background: linear-gradient(135deg, #FF4747, #c70000); }
+.delivery-info { flex: 1; min-width: 0; }
+.delivery-name {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.delivery-meta {
+  font-size: 11px;
+  color: var(--text-sub);
+  display: flex; align-items: center; gap: 6px;
+}
+.delivery-status {
+  display: inline-flex; align-items: center;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  flex-shrink: 0;
+}
+.status-pending { background: rgba(251,191,36,0.15); color: #b45309; }
+.status-completed { background: rgba(34,197,94,0.15); color: #15803d; }
+.status-refunded { background: rgba(56,196,242,0.15); color: #0369a1; }
+.status-issue { background: rgba(240,86,128,0.15); color: #be123c; }
+
+/* BOTTOM NAV */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+  z-index: 50;
+}
+.nav-item {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 8px 4px;
+  background: none; border: none;
+  font-family: inherit;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+.nav-item.active { color: var(--navy); }
+.nav-item:hover { color: var(--navy-light); }
+
+/* FX BANNER (Inbox Magic teaser) */
+.banner {
+  background: linear-gradient(135deg, rgba(56,196,242,0.1), rgba(30,58,138,0.05));
+  border: 1px solid rgba(56,196,242,0.2);
+  border-radius: var(--r-lg);
+  padding: 12px 14px;
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+.banner-icon {
+  font-size: 20px;
+}
+.banner-text { flex: 1; font-size: 12px; line-height: 1.5; color: var(--text-main); }
+.banner-text strong { color: var(--navy); }
+.banner-arrow { color: var(--cyan); flex-shrink: 0; }
+
+@media (min-width: 481px) {
+  body { padding: 24px 0; background: #e2e8f0; }
+  .app { border-radius: 28px; overflow: hidden; box-shadow: var(--shadow-lg); min-height: calc(100vh - 48px); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-top">
+      <div class="logo">Double<span>Check</span></div>
+      <button class="icon-btn" aria-label="התראות">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      </button>
+    </div>
+    <div class="greeting">
+      <h1>שלום אלון 👋</h1>
+      <p>יש לך משלוח אחד שמחכה לבדיקה</p>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <main class="content">
+    <!-- CTA -->
+    <div class="cta-card">
+      <div class="cta-icon">
+        <svg width="32" height="32" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14.31 8l5.74 9.94"/><path d="M9.69 8h11.48"/><path d="M7.38 12l5.74-9.94"/><path d="M9.69 16L3.95 6.06"/><path d="M14.31 16H2.83"/><path d="M16.62 12l-5.74 9.94"/></svg>
+      </div>
+      <h2>וודא משלוח חדש</h2>
+      <p>צלם את הקבלה או העבר אישור הזמנה במייל — הכל נכנס אוטומטית</p>
+      <button class="cta-btn">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        צלם קבלה
+      </button>
+      <button class="cta-secondary">
+        📨 קליטה דרך מייל
+      </button>
+    </div>
+
+    <!-- INBOX MAGIC BANNER -->
+    <div class="banner">
+      <div class="banner-icon">📨</div>
+      <div class="banner-text">
+        <strong>Inbox Magic מוכן!</strong><br>
+        <small style="color: var(--text-sub);">העבר אישור מאמזון/AliExpress לכתובת שלך — נקלט אוטומטית</small>
+      </div>
+      <svg class="banner-arrow" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat green">
+        <div class="stat-value">18</div>
+        <div class="stat-label">משלוחים תקינים</div>
+      </div>
+      <div class="stat coral">
+        <div class="stat-value">5</div>
+        <div class="stat-label">עם פערים</div>
+      </div>
+      <div class="stat navy">
+        <div class="stat-value">₪247</div>
+        <div class="stat-label">סך החזרים</div>
+      </div>
+    </div>
+
+    <!-- RECENT DELIVERIES -->
+    <div class="section-header">
+      <div class="section-title">משלוחים אחרונים</div>
+      <a href="#" class="section-link">הצג הכל ←</a>
+    </div>
+    <div class="delivery-list">
+      <div class="delivery">
+        <div class="delivery-logo logo-rl">RL</div>
+        <div class="delivery-info">
+          <div class="delivery-name">רמי לוי — הזמנה #2019794</div>
+          <div class="delivery-meta">
+            <span>היום • 23 פריטים • ₪373.77</span>
+          </div>
+        </div>
+        <span class="delivery-status status-pending">בבדיקה</span>
+      </div>
+      <div class="delivery">
+        <div class="delivery-logo logo-amazon">AZ</div>
+        <div class="delivery-info">
+          <div class="delivery-name">Amazon US — Order #112-7834</div>
+          <div class="delivery-meta">
+            <span>אתמול • 4 פריטים • $87.50</span>
+          </div>
+        </div>
+        <span class="delivery-status status-issue">3 פערים</span>
+      </div>
+      <div class="delivery">
+        <div class="delivery-logo logo-shufersal">SH</div>
+        <div class="delivery-info">
+          <div class="delivery-name">שופרסל אונליין — הזמנה #88142</div>
+          <div class="delivery-meta">
+            <span>05/05 • 31 פריטים • ₪412.30</span>
+          </div>
+        </div>
+        <span class="delivery-status status-completed">תקין</span>
+      </div>
+      <div class="delivery">
+        <div class="delivery-logo logo-aliexpress">AE</div>
+        <div class="delivery-info">
+          <div class="delivery-name">AliExpress — אוזניות+כיסוי</div>
+          <div class="delivery-meta">
+            <span>03/05 • 2 פריטים • $24.99</span>
+          </div>
+        </div>
+        <span class="delivery-status status-refunded">החזר התקבל</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-item active">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      בית
+    </button>
+    <button class="nav-item">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+      היסטוריה
+    </button>
+    <button class="nav-item">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M4 4h16c1 0 2 1 2 2v12c0 1-1 2-2 2H4c-1 0-2-1-2-2V6c0-1 1-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+      Inbox 📨
+    </button>
+    <button class="nav-item">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      הגדרות
+    </button>
+  </nav>
+</div>
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Double Check — Inbox Magic Setup</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1e3a8a; --navy-light: #3b5cb8;
+  --cyan: #38C4F2; --coral: #F05680; --green: #22c55e;
+  --bg: #f4f6fb; --surface: #fff;
+  --border: rgba(30,58,138,0.08);
+  --text-main: #1e293b; --text-sub: #64748b; --text-muted: #94a3b8;
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.06);
+  --shadow-md: 0 4px 14px rgba(15,23,42,0.08);
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 22px;
+  --font-he: 'Heebo', sans-serif;
+  --font-en: 'Fredoka', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: var(--font-he);
+  background: var(--bg);
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--bg);
+  min-height: 100vh;
+  padding-bottom: 32px;
+}
+
+/* HERO */
+.hero {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 60%, var(--cyan) 100%);
+  padding: 24px 20px 60px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '📨';
+  position: absolute;
+  font-size: 220px;
+  top: -40px;
+  left: -50px;
+  opacity: 0.08;
+  filter: blur(2px);
+}
+.hero-back {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  margin-bottom: 14px;
+  position: relative; z-index: 1;
+}
+.hero h1 {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+  position: relative; z-index: 1;
+}
+.hero p {
+  font-size: 13px;
+  opacity: 0.85;
+  line-height: 1.6;
+  position: relative; z-index: 1;
+}
+
+/* INBOX CARD */
+.inbox-card {
+  margin: -40px 16px 0;
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  padding: 22px 20px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  z-index: 2;
+}
+.inbox-status {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 12px;
+}
+.live-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulseDot 1.5s ease-in-out infinite;
+}
+@keyframes pulseDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.email-display {
+  background: linear-gradient(135deg, rgba(56,196,242,0.08), rgba(30,58,138,0.04));
+  border: 2px dashed rgba(56,196,242,0.3);
+  border-radius: var(--r-lg);
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.email-address {
+  font-family: var(--font-en);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 6px;
+  word-break: break-all;
+  letter-spacing: -0.3px;
+}
+.email-address-hint {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
+.action-row {
+  display: flex; gap: 8px;
+}
+.action-btn {
+  flex: 1;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: var(--r-md);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.action-btn.copy { background: var(--cyan); color: #fff; }
+.action-btn.qr { background: var(--bg); color: var(--navy); }
+
+/* QR CODE */
+.qr-section {
+  margin: 16px;
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+.qr-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 14px;
+}
+.qr-display {
+  width: 160px; height: 160px;
+  margin: 0 auto 12px;
+  background:
+    linear-gradient(45deg, var(--text-main) 25%, transparent 25%) 0 0/8px 8px,
+    linear-gradient(-45deg, var(--text-main) 25%, transparent 25%) 0 0/8px 8px,
+    linear-gradient(45deg, transparent 75%, var(--text-main) 75%) 0 0/8px 8px,
+    linear-gradient(-45deg, transparent 75%, var(--text-main) 75%) 0 0/8px 8px,
+    var(--surface);
+  background-size: 12px 12px;
+  border-radius: var(--r-md);
+  position: relative;
+  border: 8px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--border);
+}
+.qr-display::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(0deg, var(--surface) 0%, transparent 8%, transparent 92%, var(--surface) 100%),
+    linear-gradient(90deg, var(--surface) 0%, transparent 8%, transparent 92%, var(--surface) 100%);
+}
+.qr-corner {
+  position: absolute;
+  width: 30px; height: 30px;
+  border: 4px solid var(--text-main);
+  background: var(--surface);
+}
+.qr-corner.tl { top: -2px; left: -2px; }
+.qr-corner.tr { top: -2px; right: -2px; }
+.qr-corner.bl { bottom: -2px; left: -2px; }
+.qr-corner-inner {
+  position: absolute;
+  inset: 6px;
+  background: var(--text-main);
+}
+.qr-logo {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 32px; height: 32px;
+  background: var(--cyan);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  font-size: 16px;
+  z-index: 2;
+  box-shadow: 0 0 0 4px var(--surface);
+}
+.qr-hint {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
+/* INSTRUCTIONS */
+.section { padding: 0 16px; }
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 24px 0 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.step-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px;
+  margin-bottom: 8px;
+  display: flex; gap: 12px;
+}
+.step-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cyan), #2da8d4);
+  color: #fff;
+  font-family: var(--font-en);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.step-text { flex: 1; font-size: 12px; line-height: 1.6; }
+.step-text strong { color: var(--navy); display: block; margin-bottom: 2px; font-size: 13px; }
+
+/* TEST BUTTON */
+.test-btn {
+  width: calc(100% - 32px);
+  margin: 16px;
+  background: linear-gradient(135deg, var(--green), #16a34a);
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 8px 20px rgba(34,197,94,0.25);
+}
+
+/* SUPPORTED VENDORS */
+.vendors-section {
+  margin: 16px;
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  padding: 16px;
+}
+.vendors-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+.vendors-sub {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-bottom: 12px;
+}
+.vendors-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.vendor-chip {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 10px 4px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-sub);
+}
+.vendor-emoji { font-size: 18px; display: block; margin-bottom: 2px; }
+
+/* TIP */
+.tip {
+  margin: 16px;
+  padding: 12px 14px;
+  background: rgba(251,191,36,0.08);
+  border: 1px solid rgba(251,191,36,0.2);
+  border-radius: var(--r-md);
+  font-size: 12px;
+  line-height: 1.6;
+  display: flex; gap: 10px;
+}
+.tip strong { color: #b45309; }
+
+@media (min-width: 481px) {
+  body { padding: 24px 0; background: #e2e8f0; }
+  .app { border-radius: 28px; overflow: hidden; box-shadow: var(--shadow-md); min-height: calc(100vh - 48px); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- HERO -->
+  <div class="hero">
+    <button class="hero-back">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h1>📨 Inbox Magic</h1>
+    <p>העבר אישורי הזמנה למייל הזה — והם נכנסים אוטומטית. בלי צילום, בלי OCR.</p>
+  </div>
+
+  <!-- INBOX -->
+  <div class="inbox-card">
+    <div class="inbox-status">
+      <div class="live-dot"></div>
+      <span>פעיל • 14 הזמנות נקלטו</span>
+    </div>
+    <div class="email-display">
+      <div class="email-address">swift-eagle-42@inbox.doublecheck.app</div>
+      <div class="email-address-hint">הכתובת האישית שלך — שלח כל אישור הזמנה לכאן</div>
+    </div>
+    <div class="action-row">
+      <button class="action-btn copy">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        העתק
+      </button>
+      <button class="action-btn">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        שלח לעצמי
+      </button>
+    </div>
+  </div>
+
+  <!-- QR -->
+  <div class="qr-section">
+    <div class="qr-title">סרוק עם המחשב כדי להוסיף לאנשי הקשר</div>
+    <div class="qr-display">
+      <div class="qr-corner tl"><div class="qr-corner-inner"></div></div>
+      <div class="qr-corner tr"><div class="qr-corner-inner"></div></div>
+      <div class="qr-corner bl"><div class="qr-corner-inner"></div></div>
+      <div class="qr-logo">📨</div>
+    </div>
+    <div class="qr-hint">סריקה פותחת חלון ליצירת איש קשר חדש</div>
+  </div>
+
+  <!-- HOW TO USE -->
+  <div class="section">
+    <div class="section-title">
+      <span style="font-size: 18px;">🚀</span>
+      איך משתמשים?
+    </div>
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-text">
+        <strong>העברה ידנית</strong>
+        קיבלת אישור הזמנה? לחץ Forward → הדבק את הכתובת שלך → שלח. תוך 5 שניות תקבל הודעה שההזמנה נקלטה.
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div class="step-text">
+        <strong>פילטר אוטומטי ב-Gmail</strong>
+        Settings → Filters → Create filter → From: <code style="background: var(--bg); padding: 2px 6px; border-radius: 6px;">no-reply@amazon.com</code> → Forward to: הכתובת שלך. עכשיו כל הזמנה מאמזון נכנסת אוטומטית.
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div class="step-text">
+        <strong>שיתוף בוואטסאפ לעצמך</strong>
+        שמור את הכתובת ב"Saved Messages" של וואטסאפ — תוכל להעתיק במהירות מכל מקום.
+      </div>
+    </div>
+  </div>
+
+  <!-- TEST BUTTON -->
+  <button class="test-btn">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    שלח מייל בדיקה — לוודא שהכל עובד
+  </button>
+
+  <!-- SUPPORTED VENDORS -->
+  <div class="vendors-section">
+    <div class="vendors-title">ספקים נתמכים מראש 🎯</div>
+    <div class="vendors-sub">פרסור ייעודי לדיוק 99%. כל ספק אחר עובד דרך Gemini Generic.</div>
+    <div class="vendors-grid">
+      <div class="vendor-chip"><span class="vendor-emoji">📦</span>Amazon</div>
+      <div class="vendor-chip"><span class="vendor-emoji">🛒</span>AliExpress</div>
+      <div class="vendor-chip"><span class="vendor-emoji">👕</span>SHEIN</div>
+      <div class="vendor-chip"><span class="vendor-emoji">🛍</span>Temu</div>
+      <div class="vendor-chip"><span class="vendor-emoji">💊</span>iHerb</div>
+      <div class="vendor-chip"><span class="vendor-emoji">🔵</span>eBay</div>
+      <div class="vendor-chip"><span class="vendor-emoji">🥬</span>רמי לוי</div>
+      <div class="vendor-chip"><span class="vendor-emoji">🥚</span>שופרסל</div>
+      <div class="vendor-chip"><span class="vendor-emoji">🍞</span>יוחננוף</div>
+      <div class="vendor-chip"><span class="vendor-emoji">🍱</span>Wolt</div>
+      <div class="vendor-chip"><span class="vendor-emoji">🚀</span>Yango</div>
+      <div class="vendor-chip" style="background: linear-gradient(135deg, var(--cyan), #2da8d4); color: #fff;"><span class="vendor-emoji">✨</span>+כל אחר</div>
+    </div>
+  </div>
+
+  <!-- TIP -->
+  <div class="tip">
+    <span style="font-size: 18px;">🔒</span>
+    <div>
+      <strong>פרטיות:</strong> תוכן המיילים נמחק אחרי 30 יום. רק נתוני ההזמנה (פריטים, מחירים) נשמרים. אפשר לאפס את הכתובת בכל שלב אם הגיע spam.
+    </div>
+  </div>
+</div>
+</body>
+</html>

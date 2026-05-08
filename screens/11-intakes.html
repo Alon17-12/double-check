@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Double Check — מיילים שנקלטו</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1e3a8a; --navy-light: #3b5cb8;
+  --cyan: #38C4F2; --coral: #F05680; --orange: #fb923c; --green: #22c55e; --yellow: #fbbf24;
+  --bg: #f4f6fb; --surface: #fff;
+  --border: rgba(30,58,138,0.08);
+  --text-main: #1e293b; --text-sub: #64748b; --text-muted: #94a3b8;
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.06);
+  --shadow-md: 0 4px 14px rgba(15,23,42,0.08);
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 22px;
+  --font-he: 'Heebo', sans-serif;
+  --font-en: 'Fredoka', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: var(--font-he);
+  background: var(--bg);
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--bg);
+  min-height: 100vh;
+  padding-bottom: 32px;
+}
+
+/* HEADER */
+.header {
+  background: var(--surface);
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 10;
+}
+.header-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 8px;
+}
+.back-btn, .icon-btn {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--bg);
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--navy);
+}
+.header-title {
+  flex: 1;
+}
+.header-title h1 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--navy);
+  display: flex; align-items: center; gap: 6px;
+}
+.header-title p {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
+/* INBOX ADDRESS BAR */
+.inbox-bar {
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px;
+  color: var(--text-sub);
+}
+.inbox-bar code {
+  font-family: var(--font-en);
+  color: var(--navy);
+  font-weight: 600;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* STATS STRIP */
+.stats-strip {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.stat-cell {
+  flex: 1;
+  padding: 12px 8px;
+  text-align: center;
+  border-left: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-sub);
+}
+.stat-cell:first-child { border-left: none; }
+.stat-cell strong {
+  display: block;
+  font-family: var(--font-en);
+  font-size: 18px;
+  margin-bottom: 1px;
+}
+.stat-cell.green strong { color: var(--green); }
+.stat-cell.orange strong { color: var(--orange); }
+.stat-cell.coral strong { color: var(--coral); }
+.stat-cell.navy strong { color: var(--navy); }
+
+/* FILTER PILLS */
+.filters {
+  display: flex; gap: 6px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.filters::-webkit-scrollbar { display: none; }
+.pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-sub);
+  padding: 7px 12px;
+  border-radius: 100px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.pill.active {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+
+/* INTAKE LIST */
+.day-header {
+  padding: 12px 16px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.intakes { padding: 0 12px; }
+.intake {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px;
+  margin-bottom: 8px;
+  display: flex; gap: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.intake:hover {
+  border-color: var(--cyan);
+  box-shadow: var(--shadow-sm);
+}
+
+.intake-status-bar {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 4px;
+  border-radius: 4px 0 0 4px;
+}
+.intake-status-bar.success { background: var(--green); }
+.intake-status-bar.partial { background: var(--orange); }
+.intake-status-bar.spam { background: var(--text-muted); }
+.intake-status-bar.failed { background: var(--coral); }
+
+.intake-icon {
+  width: 40px; height: 40px;
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.intake-icon.success { background: rgba(34,197,94,0.12); }
+.intake-icon.partial { background: rgba(251,146,60,0.12); }
+.intake-icon.spam { background: rgba(100,116,139,0.12); }
+.intake-icon.failed { background: rgba(240,86,128,0.12); }
+
+.intake-info {
+  flex: 1;
+  min-width: 0;
+}
+.intake-row1 {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 3px;
+}
+.intake-vendor {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.intake-time {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-en);
+  flex-shrink: 0;
+}
+.intake-from {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  direction: ltr;
+  text-align: right;
+}
+.intake-result {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px;
+}
+.result-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.result-badge.success {
+  background: rgba(34,197,94,0.15);
+  color: #15803d;
+}
+.result-badge.partial {
+  background: rgba(251,146,60,0.15);
+  color: #c2410c;
+}
+.result-badge.spam {
+  background: rgba(100,116,139,0.15);
+  color: var(--text-sub);
+}
+.result-badge.failed {
+  background: rgba(240,86,128,0.15);
+  color: #be123c;
+}
+.intake-detail {
+  color: var(--text-sub);
+}
+.intake-amount {
+  margin-right: auto;
+  font-family: var(--font-en);
+  font-weight: 700;
+  color: var(--navy);
+}
+
+/* PARSER INFO */
+.parser-tag {
+  font-size: 9px;
+  background: rgba(56,196,242,0.12);
+  color: var(--cyan);
+  padding: 2px 6px;
+  border-radius: 100px;
+  font-weight: 600;
+  font-family: var(--font-en);
+}
+
+@media (min-width: 481px) {
+  body { padding: 24px 0; background: #e2e8f0; }
+  .app { border-radius: 28px; overflow: hidden; box-shadow: var(--shadow-md); min-height: calc(100vh - 48px); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="header-row">
+      <button class="back-btn">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="header-title">
+        <h1>📨 מיילים שנקלטו</h1>
+        <p>היסטוריית פיענוח של Inbox Magic</p>
+      </div>
+      <button class="icon-btn">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </button>
+    </div>
+    <div class="inbox-bar">
+      <span>📬</span>
+      <code>swift-eagle-42@inbox.doublecheck.app</code>
+    </div>
+  </header>
+
+  <!-- STATS -->
+  <div class="stats-strip">
+    <div class="stat-cell navy">
+      <strong>17</strong>
+      סך מיילים
+    </div>
+    <div class="stat-cell green">
+      <strong>14</strong>
+      פוענחו
+    </div>
+    <div class="stat-cell orange">
+      <strong>2</strong>
+      חלקיים
+    </div>
+    <div class="stat-cell coral">
+      <strong>1</strong>
+      נדחה
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <button class="pill active">הכל</button>
+    <button class="pill">פוענחו</button>
+    <button class="pill">דורשים בדיקה</button>
+    <button class="pill">spam/נדחו</button>
+  </div>
+
+  <!-- TODAY -->
+  <div class="day-header">היום • 8 במאי</div>
+  <div class="intakes">
+    <div class="intake">
+      <div class="intake-status-bar success"></div>
+      <div class="intake-icon success">📦</div>
+      <div class="intake-info">
+        <div class="intake-row1">
+          <span class="intake-vendor">Amazon US</span>
+          <span class="intake-time">14:32</span>
+        </div>
+        <div class="intake-from">auto-confirm@amazon.com</div>
+        <div class="intake-result">
+          <span class="result-badge success">✓ פוענח</span>
+          <span class="parser-tag">amazon_us</span>
+          <span class="intake-detail">4 פריטים</span>
+          <span class="intake-amount">$87.50</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="intake">
+      <div class="intake-status-bar success"></div>
+      <div class="intake-icon success">🛒</div>
+      <div class="intake-info">
+        <div class="intake-row1">
+          <span class="intake-vendor">AliExpress</span>
+          <span class="intake-time">11:48</span>
+        </div>
+        <div class="intake-from">transaction@notice.aliexpress.com</div>
+        <div class="intake-result">
+          <span class="result-badge success">✓ פוענח</span>
+          <span class="parser-tag">aliexpress</span>
+          <span class="intake-detail">2 פריטים</span>
+          <span class="intake-amount">$24.99</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="intake">
+      <div class="intake-status-bar partial"></div>
+      <div class="intake-icon partial">⚠️</div>
+      <div class="intake-info">
+        <div class="intake-row1">
+          <span class="intake-vendor">חנות לא מזוהה</span>
+          <span class="intake-time">10:15</span>
+        </div>
+        <div class="intake-from">orders@new-store.co.il</div>
+        <div class="intake-result">
+          <span class="result-badge partial">⚠ חלקי</span>
+          <span class="parser-tag">gemini_generic</span>
+          <span class="intake-detail">דיוק 76% — נדרשת סקירה</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- YESTERDAY -->
+  <div class="day-header">אתמול • 7 במאי</div>
+  <div class="intakes">
+    <div class="intake">
+      <div class="intake-status-bar success"></div>
+      <div class="intake-icon success">🥚</div>
+      <div class="intake-info">
+        <div class="intake-row1">
+          <span class="intake-vendor">שופרסל אונליין</span>
+          <span class="intake-time">19:22</span>
+        </div>
+        <div class="intake-from">orders@shufersal.co.il</div>
+        <div class="intake-result">
+          <span class="result-badge success">✓ פוענח</span>
+          <span class="parser-tag">shufersal</span>
+          <span class="intake-detail">31 פריטים</span>
+          <span class="intake-amount">₪412.30</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="intake">
+      <div class="intake-status-bar success"></div>
+      <div class="intake-icon success">💊</div>
+      <div class="intake-info">
+        <div class="intake-row1">
+          <span class="intake-vendor">iHerb</span>
+          <span class="intake-time">08:14</span>
+        </div>
+        <div class="intake-from">orders@iherb.com</div>
+        <div class="intake-result">
+          <span class="result-badge success">✓ פוענח</span>
+          <span class="parser-tag">iherb</span>
+          <span class="intake-detail">6 פריטים</span>
+          <span class="intake-amount">$64.30</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="intake">
+      <div class="intake-status-bar spam"></div>
+      <div class="intake-icon spam">🚫</div>
+      <div class="intake-info">
+        <div class="intake-row1">
+          <span class="intake-vendor">לא הזמנה — נדחה</span>
+          <span class="intake-time">06:30</span>
+        </div>
+        <div class="intake-from">newsletter@somesite.com</div>
+        <div class="intake-result">
+          <span class="result-badge spam">🚫 פרסומת</span>
+          <span class="intake-detail">Gemini classifier: not an order</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 DAYS AGO -->
+  <div class="day-header">לפני יומיים • 6 במאי</div>
+  <div class="intakes">
+    <div class="intake">
+      <div class="intake-status-bar success"></div>
+      <div class="intake-icon success">👕</div>
+      <div class="intake-info">
+        <div class="intake-row1">
+          <span class="intake-vendor">SHEIN</span>
+          <span class="intake-time">21:45</span>
+        </div>
+        <div class="intake-from">orders@shein.com</div>
+        <div class="intake-result">
+          <span class="result-badge success">✓ פוענח</span>
+          <span class="parser-tag">shein</span>
+          <span class="intake-detail">12 פריטים</span>
+          <span class="intake-amount">$78.20</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="intake">
+      <div class="intake-status-bar success"></div>
+      <div class="intake-icon success">🍱</div>
+      <div class="intake-info">
+        <div class="intake-row1">
+          <span class="intake-vendor">Wolt Market</span>
+          <span class="intake-time">12:33</span>
+        </div>
+        <div class="intake-from">orders@wolt.com</div>
+        <div class="intake-result">
+          <span class="result-badge success">✓ פוענח</span>
+          <span class="parser-tag">wolt</span>
+          <span class="intake-detail">15 פריטים</span>
+          <span class="intake-amount">₪187.50</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

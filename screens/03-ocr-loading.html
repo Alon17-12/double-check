@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Double Check — מחלץ פריטים</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1e3a8a; --navy-light: #3b5cb8;
+  --cyan: #38C4F2; --coral: #F05680; --green: #22c55e;
+  --bg: #f4f6fb; --surface: #fff;
+  --text-main: #1e293b; --text-sub: #64748b;
+  --r-md: 12px; --r-lg: 16px; --r-xl: 22px;
+  --font-he: 'Heebo', sans-serif;
+  --font-en: 'Fredoka', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: var(--font-he);
+  background: linear-gradient(180deg, #1e3a8a 0%, #172554 100%);
+  color: #fff;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  padding: 32px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* AMBIENT GLOW */
+.app::before {
+  content: '';
+  position: absolute;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56,196,242,0.25), transparent 70%);
+  top: -150px; left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  animation: float 6s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, -20px); }
+}
+
+/* TOP BAR */
+.top-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 32px;
+  position: relative; z-index: 2;
+}
+.logo {
+  font-family: var(--font-en);
+  font-size: 18px;
+  font-weight: 700;
+}
+.logo span { color: var(--cyan); }
+.cancel-btn {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 100px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* RECEIPT PREVIEW */
+.receipt-preview {
+  position: relative;
+  width: 70%;
+  max-width: 240px;
+  aspect-ratio: 3/4;
+  margin: 0 auto 32px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 8px;
+  padding: 16px 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 8px;
+  color: #1e293b;
+  line-height: 1.5;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
+  z-index: 2;
+}
+.receipt-preview h3 { font-family: var(--font-he); font-size: 11px; text-align: center; margin-bottom: 4px; color: var(--navy); }
+.receipt-preview .row { display: flex; justify-content: space-between; padding: 1.5px 0; }
+
+/* SCAN OVERLAY */
+.receipt-preview::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, var(--cyan) 50%, transparent);
+  box-shadow: 0 0 30px var(--cyan), 0 0 80px var(--cyan);
+  animation: scanProgress 2.2s ease-in-out infinite alternate;
+  border-radius: 4px;
+}
+@keyframes scanProgress {
+  from { top: 6%; opacity: 0.4; }
+  to { top: 94%; opacity: 1; }
+}
+
+/* HIGHLIGHTED ROWS (extracted) */
+.highlight-row {
+  position: absolute;
+  background: rgba(56,196,242,0.25);
+  border-right: 3px solid var(--cyan);
+  border-radius: 4px;
+  pointer-events: none;
+  animation: highlightFade 2s ease-in-out infinite;
+}
+.highlight-row.r1 { top: 22%; left: 6%; right: 6%; height: 6%; animation-delay: 0s; }
+.highlight-row.r2 { top: 30%; left: 6%; right: 6%; height: 6%; animation-delay: 0.3s; }
+.highlight-row.r3 { top: 38%; left: 6%; right: 6%; height: 6%; animation-delay: 0.6s; }
+@keyframes highlightFade { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+
+/* PROGRESS */
+.progress-section {
+  position: relative; z-index: 2;
+}
+.status-text {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.status-text h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+}
+.status-text p {
+  font-size: 13px;
+  opacity: 0.75;
+  line-height: 1.6;
+}
+
+.progress-bar {
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 100px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  position: relative;
+}
+.progress-fill {
+  height: 100%;
+  width: 68%;
+  background: linear-gradient(90deg, var(--cyan), #22c55e);
+  border-radius: 100px;
+  position: relative;
+  box-shadow: 0 0 12px rgba(56,196,242,0.6);
+  transition: width 0.5s ease;
+}
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+  animation: shimmer 1.4s linear infinite;
+}
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+/* STAGE LIST */
+.stages {
+  display: flex; flex-direction: column; gap: 10px;
+  margin-top: 8px;
+}
+.stage {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  font-size: 13px;
+  transition: all 0.3s;
+}
+.stage.done {
+  background: rgba(34,197,94,0.12);
+  border-color: rgba(34,197,94,0.3);
+}
+.stage.active {
+  background: rgba(56,196,242,0.12);
+  border-color: rgba(56,196,242,0.4);
+  box-shadow: 0 4px 14px rgba(56,196,242,0.2);
+}
+.stage-icon {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+.stage.done .stage-icon { background: var(--green); }
+.stage.active .stage-icon { background: var(--cyan); }
+.stage-text { flex: 1; font-weight: 500; }
+.stage.pending { opacity: 0.5; }
+.stage-time { font-size: 11px; opacity: 0.6; font-family: var(--font-en); }
+.spinner {
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* AI HINT */
+.ai-hint {
+  margin-top: auto;
+  padding: 14px 16px;
+  background: rgba(56,196,242,0.08);
+  border: 1px solid rgba(56,196,242,0.2);
+  border-radius: 14px;
+  display: flex; gap: 12px; align-items: flex-start;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.ai-hint-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.ai-hint strong { color: var(--cyan); }
+
+@media (min-width: 481px) {
+  body { padding: 24px 0; }
+  .app { border-radius: 28px; min-height: calc(100vh - 48px); box-shadow: 0 30px 80px rgba(0,0,0,0.4); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <div class="logo">Double<span>Check</span></div>
+    <button class="cancel-btn">ביטול</button>
+  </div>
+
+  <div class="receipt-preview">
+    <h3>רמי לוי</h3>
+    <div style="text-align:center; font-size:7px; opacity:0.7;">הזמנה 2019794</div>
+    <div style="border-top: 1px dashed #94a3b8; margin: 4px 0;"></div>
+    <div class="row"><span>עגבניה</span><span>6.11</span></div>
+    <div class="row"><span>מלפפון</span><span>5.68</span></div>
+    <div class="row"><span>פלפל אדום</span><span>9.29</span></div>
+    <div class="row"><span>בצל יבש</span><span>3.56</span></div>
+    <div class="row"><span>לימון</span><span>9.06</span></div>
+    <div class="row"><span>אורז סוגת</span><span>15.00</span></div>
+    <div class="row"><span>סלט מטבוחה</span><span>14.90</span></div>
+    <div class="row"><span>פסטרמה 600ג</span><span>27.40</span></div>
+    <div class="row"><span>חומוס צבר</span><span>13.30</span></div>
+    <div class="row"><span>מגבונים</span><span>18.90</span></div>
+    <div style="border-top: 1px dashed #94a3b8; margin: 4px 0;"></div>
+    <div class="row"><strong>סה"כ</strong><strong>₪373.77</strong></div>
+    <div class="highlight-row r1"></div>
+    <div class="highlight-row r2"></div>
+    <div class="highlight-row r3"></div>
+  </div>
+
+  <div class="progress-section">
+    <div class="status-text">
+      <h2>מחלץ פריטים מהקבלה</h2>
+      <p>זה לוקח בערך 5-10 שניות</p>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill"></div>
+    </div>
+
+    <div class="stages">
+      <div class="stage done">
+        <div class="stage-icon">
+          <svg width="14" height="14" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="stage-text">תמונה הועלתה ועובדה</div>
+        <div class="stage-time">1.2s</div>
+      </div>
+      <div class="stage done">
+        <div class="stage-icon">
+          <svg width="14" height="14" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="stage-text">חנות זוהתה: רמי לוי</div>
+        <div class="stage-time">2.4s</div>
+      </div>
+      <div class="stage active">
+        <div class="stage-icon">
+          <div class="spinner"></div>
+        </div>
+        <div class="stage-text">מחלץ פריטים (15/23)</div>
+        <div class="stage-time">~3s</div>
+      </div>
+      <div class="stage pending">
+        <div class="stage-icon">
+          <svg width="12" height="12" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+        <div class="stage-text">בודק חישוב מתמטי</div>
+      </div>
+      <div class="stage pending">
+        <div class="stage-icon">
+          <svg width="12" height="12" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+        <div class="stage-text">מסיים</div>
+      </div>
+    </div>
+
+    <div class="ai-hint">
+      <div class="ai-hint-icon">✨</div>
+      <div>
+        <strong>בינה מלאכותית בעבודה.</strong>
+        Gemini מחלץ את הפריטים בדיוק של 95%+. תוכל לערוך הכל אחרי שזה ייגמר.
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

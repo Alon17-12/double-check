@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Double Check — צילום קבלה</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1e3a8a; --navy-light: #3b5cb8;
+  --cyan: #38C4F2; --coral: #F05680; --green: #22c55e; --yellow: #fbbf24;
+  --bg: #0f172a; --surface: #1e293b;
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 22px;
+  --font-he: 'Heebo', sans-serif;
+  --font-en: 'Fredoka', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: var(--font-he);
+  background: #000;
+  color: #fff;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  background: #000;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* TOP BAR */
+.top-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  padding: 16px 16px calc(16px + env(safe-area-inset-top));
+  display: flex; justify-content: space-between; align-items: center;
+  z-index: 10;
+  background: linear-gradient(180deg, rgba(0,0,0,0.6), transparent);
+}
+.icon-btn {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+/* CAMERA VIEW (simulated) */
+.camera-view {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: #1a1a1a;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.receipt-mockup {
+  width: 76%;
+  max-width: 320px;
+  background: #fff;
+  color: #1e293b;
+  padding: 16px 14px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  line-height: 1.5;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+  transform: rotate(-1.5deg);
+}
+.receipt-mockup h3 {
+  font-family: var(--font-he);
+  font-size: 13px;
+  text-align: center;
+  margin-bottom: 4px;
+  color: var(--navy);
+}
+.receipt-mockup .center { text-align: center; }
+.receipt-mockup .row { display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px dashed #cbd5e1; }
+.receipt-mockup .row:last-child { border: none; }
+.receipt-mockup hr { border: none; border-top: 1px dashed #94a3b8; margin: 4px 0; }
+
+/* SCANNING FRAME */
+.scan-frame {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% - 32px);
+  max-width: 360px;
+  aspect-ratio: 3/4;
+  pointer-events: none;
+}
+.corner {
+  position: absolute;
+  width: 32px; height: 32px;
+  border: 3px solid var(--cyan);
+}
+.corner.tl { top: 0; left: 0; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+.corner.tr { top: 0; right: 0; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
+.corner.bl { bottom: 0; left: 0; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
+.corner.br { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
+.scan-line {
+  position: absolute;
+  left: 8px; right: 8px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  box-shadow: 0 0 12px var(--cyan);
+  animation: scanMove 2.5s ease-in-out infinite alternate;
+}
+@keyframes scanMove {
+  from { top: 8%; }
+  to { top: 92%; }
+}
+
+/* TIP BANNER */
+.tip-banner {
+  position: absolute;
+  bottom: 200px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15,23,42,0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 100px;
+  font-size: 12px;
+  display: flex; align-items: center; gap: 8px;
+  border: 1px solid rgba(56,196,242,0.3);
+  white-space: nowrap;
+  z-index: 5;
+}
+.tip-banner .pulse {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--cyan);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.7); } }
+
+/* BOTTOM CONTROLS */
+.controls {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 24px 24px calc(24px + env(safe-area-inset-bottom));
+  background: linear-gradient(0deg, rgba(0,0,0,0.85), transparent);
+  z-index: 10;
+}
+.modes {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+.mode {
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.7);
+  border: none;
+  padding: 8px 14px;
+  border-radius: 100px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mode.active { background: var(--cyan); color: #0f172a; }
+
+.action-row {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.gallery-btn, .toggle-btn {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.shutter {
+  width: 78px; height: 78px;
+  border-radius: 50%;
+  background: #fff;
+  border: 5px solid rgba(255,255,255,0.3);
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 0 0 3px rgba(56,196,242,0.5);
+}
+.shutter::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s;
+}
+.shutter:active::after { transform: scale(0.92); }
+
+/* PAGES INDICATOR */
+.pages-indicator {
+  position: absolute;
+  top: 80px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15,23,42,0.7);
+  backdrop-filter: blur(10px);
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--cyan);
+  border: 1px solid rgba(56,196,242,0.3);
+}
+
+@media (min-width: 481px) {
+  body { padding: 24px 0; background: #1e293b; }
+  .app { border-radius: 28px; max-height: calc(100vh - 48px); }
+  .camera-view { height: calc(100vh - 48px); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <button class="icon-btn" aria-label="חזרה">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="title">צלם קבלה</div>
+    <button class="icon-btn" aria-label="פלאש">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </button>
+  </div>
+
+  <!-- PAGES INDICATOR -->
+  <div class="pages-indicator">📄 דף 1 מתוך 1 (לחץ + להוסיף)</div>
+
+  <!-- CAMERA VIEW -->
+  <div class="camera-view">
+    <!-- Mock receipt being captured -->
+    <div class="receipt-mockup">
+      <h3>רמי לוי</h3>
+      <div class="center" style="font-size:8px; color:#64748b;">סניף שילת • הזמנה 2019794</div>
+      <hr>
+      <div class="row"><span>עגבניה 1.04 ק"ג</span><span>6.11</span></div>
+      <div class="row"><span>מלפפון 0.96 ק"ג</span><span>5.68</span></div>
+      <div class="row"><span>פלפל אדום 1.04</span><span>9.29</span></div>
+      <div class="row"><span>בצל יבש 0.91</span><span>3.56</span></div>
+      <div class="row"><span>לימון 1.02 ק"ג</span><span>9.06</span></div>
+      <div class="row"><span>אורז סוגת 1 ק"ג</span><span>15.00</span></div>
+      <div class="row"><span>סלט מטבוחה 500ג</span><span>14.90</span></div>
+      <div class="row"><span>פסטרמה 600ג</span><span>27.40</span></div>
+      <div class="row"><span>חומוס צבר 400ג</span><span>13.30</span></div>
+      <div class="row"><span>מגבונים 400 יח'</span><span>18.90</span></div>
+      <hr>
+      <div class="row"><strong>סה"כ כולל מע"מ</strong><strong>₪373.77</strong></div>
+    </div>
+
+    <!-- Scan frame overlay -->
+    <div class="scan-frame">
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+      <div class="scan-line"></div>
+    </div>
+
+    <!-- Tip banner -->
+    <div class="tip-banner">
+      <span class="pulse"></span>
+      <span>החזק יציב - הקבלה מזוהה</span>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="modes">
+      <button class="mode active">קבלה</button>
+      <button class="mode">PDF</button>
+      <button class="mode">ידני</button>
+    </div>
+    <div class="action-row">
+      <button class="gallery-btn" aria-label="גלריה">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </button>
+      <button class="shutter" aria-label="צלם"></button>
+      <button class="toggle-btn" aria-label="המצלמה השנייה">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path d="M16 8l-8 8M8 8l8 8"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
